@@ -2,7 +2,7 @@
  * Configuración centralizada de las cámaras de Babylon.js para cada mini-proyecto.
  */
 export const CAMERA_CONFIG = {
-    // 🪐 ArcRotateCamera: Órbita del Sistema Solar
+    // ArcRotateCamera: Órbita del Sistema Solar
     arcRotate: {
         alpha: 3.14 / 4,               // Ángulo de rotación horizontal inicial (en radianes)
         beta: 3.14 / 3,                // Ángulo de rotación vertical inicial (en radianes)
@@ -17,7 +17,7 @@ export const CAMERA_CONFIG = {
         inertia: 0.9                   // Inercia de frenado (suavidad)
     },
 
-    // 🏛️ FreeCamera: Exploración en primera persona del Museo
+    // FreeCamera: Exploración en primera persona del Museo
     free: {
         position: { x: 0, y: 1.8, z: -15 }, // Posición inicial (altura promedio de ojos = 1.8m)
         speed: 0.3,                    // Velocidad de movimiento por frame
@@ -32,7 +32,7 @@ export const CAMERA_CONFIG = {
         keysRight: [39, 68]           // Teclas D y Flecha derecha
     },
 
-    // 🚀 FollowCamera: Seguimiento suave de la Nave Espacial
+    // FollowCamera: Seguimiento suave de la Nave Espacial
     follow: {
         radius: 12,                    // Distancia detrás del objetivo (en metros)
         heightOffset: 4,               // Altura sobre el objetivo (en metros)
@@ -42,7 +42,7 @@ export const CAMERA_CONFIG = {
         checkCollisions: false         // Evita vibraciones al atravesar anillos
     },
 
-    // 🕶️ AnaglyphCamera (ArcRotate o Free adaptable)
+    // AnaglyphCamera (ArcRotate o Free adaptable)
     anaglyph: {
         eyeSpace: 0.06,                // Distancia entre ojos para el efecto estereoscópico 3D (IPD promedio = 6cm)
         alpha: -3.14 / 3,
@@ -53,7 +53,7 @@ export const CAMERA_CONFIG = {
         upperRadiusLimit: 40
     },
 
-    // 📱 DeviceOrientationCamera: Tiro al Blanco Cósmico
+    // DeviceOrientationCamera: Tiro al Blanco Cósmico
     deviceOrientation: {
         position: { x: 0, y: 0, z: 0 },
         angularSensibility: 10000,     // Sensibilidad de giro en móviles

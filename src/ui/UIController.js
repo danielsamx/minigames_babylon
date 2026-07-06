@@ -19,10 +19,10 @@ export class UIController {
         // Información de cada mini-juego
         this.cameraInfo = {
             arcRotate: {
-                title: '🪐 Órbita Cósmica',
-                icon: '🪐',
+                title: 'Órbita Cósmica',
+                icon: '',
                 gameName: 'Órbita Cósmica',
-                desc: '¡El universo gira a tus pies! Orbita el sistema solar con la ArcRotateCamera y visita los 5 planetas. ¡Haz clic sobre cada uno para registrar tu exploración!',
+                desc: 'Orbita el sistema solar con la ArcRotateCamera y visita los 5 planetas. Haz clic sobre cada uno para registrar tu exploración.',
                 controls: [
                     { keys: ['Arrastrar Click Izq.'], action: 'Girar alrededor del Sol' },
                     { keys: ['Rueda del Ratón'],    action: 'Zoom (acercar / alejar)' },
@@ -30,10 +30,10 @@ export class UIController {
                 ]
             },
             free: {
-                title: '🏛️ La Galería Prohibida',
-                icon: '🏛️',
+                title: 'La Galería Prohibida',
+                icon: '',
                 gameName: 'La Galería Prohibida',
-                desc: '¡Un museo lleno de secretos! Camina en primera persona con la FreeCamera, sentirás gravedad y colisiones reales. Encuentra los 5 objetos dorados ocultos.',
+                desc: 'Camina en primera persona con la FreeCamera, sentirás gravedad y colisiones reales. Encuentra los 5 objetos dorados ocultos.',
                 controls: [
                     { keys: ['W', 'A', 'S', 'D'],      action: 'Caminar (adelante/lados/atrás)' },
                     { keys: ['Mover el Ratón'],          action: 'Mirar alrededor' },
@@ -41,10 +41,10 @@ export class UIController {
                 ]
             },
             follow: {
-                title: '🚀 Piloto de Estrellas',
-                icon: '🚀',
+                title: 'Piloto de Estrellas',
+                icon: '',
                 gameName: 'Piloto de Estrellas',
-                desc: '¡Acelera a la velocidad de la luz! Pilota tu nave con la FollowCamera pegada a tu espalda. Cruza todos los aros neón para conseguir la puntuación máxima.',
+                desc: 'Pilota tu nave con la FollowCamera pegada a tu espalda. Cruza todos los aros neón para conseguir la puntuación máxima.',
                 controls: [
                     { keys: ['W', 'S'],     action: 'Inclinar arriba / abajo (Pitch)' },
                     { keys: ['A', 'D'],     action: 'Girar izquierda / derecha (Yaw)' },
@@ -52,10 +52,10 @@ export class UIController {
                 ]
             },
             anaglyph: {
-                title: '🕶️ El Laberinto del Tiempo',
-                icon: '🕶️',
+                title: 'El Laberinto del Tiempo',
+                icon: '',
                 gameName: 'El Laberinto del Tiempo',
-                desc: '¡El tiempo corre! Usa la AnaglyphCamera estereoscópica (gafas Rojo/Cian) y mueve la esfera hasta la salida antes de que expire el contador.',
+                desc: 'Usa la AnaglyphCamera estereoscópica (gafas Rojo/Cian) y mueve la esfera hasta la salida antes de que expire el contador.',
                 controls: [
                     { keys: ['W', 'A', 'S', 'D'],   action: 'Mover la esfera héroe' },
                     { keys: ['Click + Arrastrar'],   action: 'Rotar perspectiva 3D' },
@@ -63,10 +63,10 @@ export class UIController {
                 ]
             },
             deviceOrientation: {
-                title: '🎯 Cazador de Asteroides',
-                icon: '🎯',
+                title: 'Cazador de Asteroides',
+                icon: '',
                 gameName: 'Cazador de Asteroides',
-                desc: '¡El espacio te necesita! Usa la DeviceOrientationCamera (giroscopio en móvil / arrastre en PC) para apuntar y destruir los asteroides flotantes con láseres.',
+                desc: 'Usa la DeviceOrientationCamera (giroscopio en móvil o arrastre en PC) para apuntar y destruir los asteroides flotantes con láseres.',
                 controls: [
                     { keys: ['Girar Dispositivo'],       action: 'Apuntar con giroscopio físico' },
                     { keys: ['Click + Arrastrar'],        action: 'Apuntar en escritorio' },
@@ -154,9 +154,9 @@ export class UIController {
             const prev = parseInt(localStorage.getItem(key) || '0');
             if (score > prev) {
                 localStorage.setItem(key, score);
-                if (recordEl) recordEl.innerText = `🏆 ¡Nuevo récord! Anterior: ${prev.toLocaleString()} pts`;
+                if (recordEl) recordEl.innerText = `¡Nuevo récord! Anterior: ${prev.toLocaleString()} pts`;
             } else {
-                if (recordEl) recordEl.innerText = `🏅 Récord: ${prev.toLocaleString()} pts`;
+                if (recordEl) recordEl.innerText = `Récord: ${prev.toLocaleString()} pts`;
             }
         }
 
@@ -189,7 +189,7 @@ export class UIController {
         if (sceneKey) {
             const key = `record_${sceneKey}`;
             const prev = parseInt(localStorage.getItem(key) || '0');
-            if (recordEl) recordEl.innerText = `🏅 Récord actual: ${prev.toLocaleString()} pts`;
+            if (recordEl) recordEl.innerText = `Récord actual: ${prev.toLocaleString()} pts`;
         }
 
         overlay.style.display = 'flex';
@@ -311,35 +311,35 @@ export class UIController {
         if (!this.statsContainer) return;
         const record = this.getRecord('arcRotate');
         this.statsContainer.innerHTML = `
-            <div class="stat-row" style="margin-bottom:6px;">
-                <span class="stat-label">Planetas Visitados</span>
+            <div class="stat-row" style="margin-bottom:8px;">
+                <span class="stat-label">Planetas</span>
                 <span class="stat-value" id="val-planet-score">0 / 5</span>
             </div>
-            <div class="stat-row" style="margin-bottom:6px;">
+            <div class="stat-row" style="margin-bottom:8px;">
                 <span class="stat-label">Puntuación</span>
                 <span class="stat-value" id="val-arc-points">0</span>
             </div>
             <div class="stat-row" style="margin-bottom:8px;">
-                <span class="stat-label">🏅 Récord</span>
-                <span class="stat-value" style="color:#facc15;">${record}</span>
+                <span class="stat-label">Record</span>
+                <span class="stat-value" style="color:#f97316;">${record}</span>
             </div>
-            <div class="stat-row" style="margin-bottom:6px;">
-                <span class="stat-label">Velocidad del tiempo</span>
+            <div class="stat-row" style="margin-bottom:8px;">
+                <span class="stat-label">Velocidad</span>
                 <span class="stat-value" id="val-timescale">1.0x</span>
             </div>
-            <div style="display:flex; gap:5px; margin-bottom:10px;">
-                <button class="comic-btn interactive" style="flex:1; padding:4px 2px; font-size:0.8rem;" id="btn-slow">LENTO</button>
-                <button class="comic-btn interactive" style="flex:1; padding:4px 2px; font-size:0.8rem;" id="btn-normal">NORMAL</button>
-                <button class="comic-btn interactive" style="flex:1; padding:4px 2px; font-size:0.8rem;" id="btn-pause">PAUSA</button>
+            <div style="display:flex; gap:4px; margin-bottom:10px;">
+                <button class="stat-control-btn interactive" id="btn-slow">Lento</button>
+                <button class="stat-control-btn interactive" id="btn-normal">Normal</button>
+                <button class="stat-control-btn interactive" id="btn-pause">Pausa</button>
             </div>
-            <div class="stat-label" style="font-size:0.82rem; font-weight:600; margin-bottom:4px;">Enfocar en:</div>
-            <select class="camera-btn interactive" id="select-focus" style="width:100%; border-radius:8px; padding:6px; background:#1e293b; color:#f1f5f9; border:1px solid rgba(255,255,255,0.1);">
-                <option value="-1">☀️ Sol (Centro)</option>
-                <option value="0">🪨 Mercurio</option>
-                <option value="1">🌫️ Venus</option>
-                <option value="2">🌍 Tierra</option>
-                <option value="3">🔴 Marte</option>
-                <option value="4">🟠 Júpiter</option>
+            <div class="stat-label" style="margin-bottom:6px; font-size:0.72rem; letter-spacing:1px; text-transform:uppercase;">Enfocar en</div>
+            <select class="stat-select interactive" id="select-focus">
+                <option value="-1">Sol (Centro)</option>
+                <option value="0">Mercurio</option>
+                <option value="1">Venus</option>
+                <option value="2">Tierra</option>
+                <option value="3">Marte</option>
+                <option value="4">Jupiter</option>
             </select>
         `;
         document.getElementById('btn-slow').addEventListener('click', () => scene.updateTimeScale(0.2));
@@ -367,25 +367,25 @@ export class UIController {
         if (!this.statsContainer) return;
         const record = this.getRecord('free');
         this.statsContainer.innerHTML = `
-            <div class="stat-row" style="margin-bottom:6px;">
-                <span class="stat-label">Objetos Encontrados</span>
+            <div class="stat-row" style="margin-bottom:8px;">
+                <span class="stat-label">Objetos</span>
                 <span class="stat-value" id="val-objects-found">0 / 5</span>
             </div>
-            <div class="stat-row" style="margin-bottom:6px;">
+            <div class="stat-row" style="margin-bottom:8px;">
                 <span class="stat-label">Puntuación</span>
                 <span class="stat-value" id="val-free-points">0</span>
             </div>
-            <div class="stat-row" style="margin-bottom:6px;">
-                <span class="stat-label">🏅 Récord</span>
-                <span class="stat-value" style="color:#facc15;">${record}</span>
+            <div class="stat-row" style="margin-bottom:8px;">
+                <span class="stat-label">Record</span>
+                <span class="stat-value" style="color:#f97316;">${record}</span>
             </div>
             <div class="stat-row" style="margin-bottom:4px;">
-                <span class="stat-label">Posición X</span>
-                <span class="stat-value" id="val-x" style="font-size:0.85rem;">0.00</span>
+                <span class="stat-label">Pos X</span>
+                <span class="stat-value" id="val-x" style="font-size:0.82rem;">0.00</span>
             </div>
             <div class="stat-row">
-                <span class="stat-label">Posición Z</span>
-                <span class="stat-value" id="val-z" style="font-size:0.85rem;">-15.00</span>
+                <span class="stat-label">Pos Z</span>
+                <span class="stat-value" id="val-z" style="font-size:0.82rem;">-15.00</span>
             </div>
         `;
         this.updateFreeUI(scene);
@@ -406,20 +406,20 @@ export class UIController {
         if (!this.statsContainer) return;
         const record = this.getRecord('follow');
         this.statsContainer.innerHTML = `
-            <div class="stat-row" style="margin-bottom:6px;">
+            <div class="stat-row" style="margin-bottom:8px;">
                 <span class="stat-label">Puntuación</span>
                 <span class="stat-value" id="val-score">0</span>
             </div>
-            <div class="stat-row" style="margin-bottom:6px;">
-                <span class="stat-label">🏅 Récord</span>
-                <span class="stat-value" style="color:#facc15;">${record}</span>
+            <div class="stat-row" style="margin-bottom:8px;">
+                <span class="stat-label">Record</span>
+                <span class="stat-value" style="color:#f97316;">${record}</span>
             </div>
-            <div class="stat-row" style="margin-bottom:6px;">
-                <span class="stat-label">Aros Cruzados</span>
+            <div class="stat-row" style="margin-bottom:8px;">
+                <span class="stat-label">Aros</span>
                 <span class="stat-value" id="val-rings">0 / ${scene.config.ringCount}</span>
             </div>
-            <div class="stat-row" style="margin-bottom:2px; flex-direction:column; align-items:flex-start;">
-                <span class="stat-label" id="val-speed-txt">Velocidad: 0 km/h</span>
+            <div style="margin-bottom:2px;">
+                <span class="stat-label" id="val-speed-txt" style="font-size:0.75rem;">Velocidad: 0 km/h</span>
                 <div class="speedometer-container">
                     <div class="speedometer-bar" id="speed-bar" style="width:0%"></div>
                 </div>
@@ -457,24 +457,22 @@ export class UIController {
         const record = this.getRecord('anaglyph');
         this.statsContainer.innerHTML = `
             <div class="stat-row" style="margin-bottom:8px;">
-                <span class="stat-label">⏱️ Tiempo Restante</span>
-                <span class="stat-value" id="val-timer" style="font-size:1.4rem; font-weight:900;">60s</span>
+                <span class="stat-label">Tiempo</span>
+                <span class="stat-value" id="val-timer" style="font-size:1.3rem; font-weight:800;">60s</span>
             </div>
-            <div class="stat-row" style="margin-bottom:6px;">
+            <div class="stat-row" style="margin-bottom:8px;">
                 <span class="stat-label">Puntuación</span>
                 <span class="stat-value" id="val-anaglyph-score">0</span>
             </div>
-            <div class="stat-row" style="margin-bottom:6px;">
-                <span class="stat-label">🏅 Récord</span>
-                <span class="stat-value" style="color:#facc15;">${record}</span>
+            <div class="stat-row" style="margin-bottom:8px;">
+                <span class="stat-label">Record</span>
+                <span class="stat-value" style="color:#f97316;">${record}</span>
             </div>
             <div class="stat-row" style="margin-bottom:4px;">
-                <span class="stat-label">Lente 3D (IPD)</span>
-                <span class="stat-value" id="val-eyespace" style="font-size:0.85rem;">0.06m</span>
+                <span class="stat-label">IPD</span>
+                <span class="stat-value" id="val-eyespace" style="font-size:0.82rem;">0.06m</span>
             </div>
-            <div>
-                <input class="interactive" type="range" id="slider-eyespace" min="0.01" max="0.20" step="0.005" value="0.06" style="width:100%; accent-color:#f97316;">
-            </div>
+            <input class="stat-slider interactive" type="range" id="slider-eyespace" min="0.01" max="0.20" step="0.005" value="0.06">
         `;
         const slider = document.getElementById('slider-eyespace');
         if (slider) {
@@ -507,24 +505,24 @@ export class UIController {
         if (!this.statsContainer) return;
         const record = this.getRecord('deviceOrientation');
         this.statsContainer.innerHTML = `
-            <div class="stat-row" style="margin-bottom:6px;">
+            <div class="stat-row" style="margin-bottom:8px;">
                 <span class="stat-label">Puntuación</span>
                 <span class="stat-value" id="val-shoot-score">0</span>
             </div>
-            <div class="stat-row" style="margin-bottom:6px;">
-                <span class="stat-label">🏅 Récord</span>
-                <span class="stat-value" style="color:#facc15;">${record}</span>
+            <div class="stat-row" style="margin-bottom:8px;">
+                <span class="stat-label">Record</span>
+                <span class="stat-value" style="color:#f97316;">${record}</span>
             </div>
-            <div class="stat-row" style="margin-bottom:6px;">
-                <span class="stat-label">Racha Actual 🔥</span>
+            <div class="stat-row" style="margin-bottom:8px;">
+                <span class="stat-label">Racha</span>
                 <span class="stat-value" id="val-streak">0</span>
             </div>
-            <div class="stat-row" style="margin-bottom:6px;">
+            <div class="stat-row" style="margin-bottom:8px;">
                 <span class="stat-label">Disparos</span>
                 <span class="stat-value" id="val-shots-fired">0</span>
             </div>
             <div class="stat-row">
-                <span class="stat-label">Blancos Activos</span>
+                <span class="stat-label">Blancos</span>
                 <span class="stat-value" id="val-targets-count">${scene.config.targetCount}</span>
             </div>
         `;
@@ -570,7 +568,7 @@ export class UIController {
 
         // Cabecera informativa
         if (this.titleEl)  this.titleEl.innerText  = info.gameName;
-        if (this.iconEl)   this.iconEl.innerText   = info.icon;
+        if (this.iconEl)   this.iconEl.innerText   = '';
         if (this.descEl)   this.descEl.innerText   = info.desc;
 
         // Panel de estadísticas específico
@@ -589,11 +587,8 @@ export class UIController {
             info.controls.forEach(ctrl => {
                 const item = document.createElement('div');
                 item.className = 'control-item';
-                const badgesHtml = ctrl.keys.map(k => `<span class="key-badge">${k}</span>`).join(' + ');
-                item.innerHTML = `
-                    <span style="color:#cbd5e1; font-size:0.78rem;">${ctrl.action}</span>
-                    <div>${badgesHtml}</div>
-                `;
+                const badgesHtml = ctrl.keys.map(k => `<span class="key-badge">${k}</span>`).join('');
+                item.innerHTML = `${badgesHtml}<span>${ctrl.action}</span>`;
                 this.controlsListEl.appendChild(item);
             });
         }

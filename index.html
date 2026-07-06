@@ -4,18 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mini-Juegos de Cámaras 3D - Babylon.js</title>
+    <title>Cámaras 3D - Babylon.js</title>
     <meta name="description"
-        content="Cinco mini-juegos 3D interactivos que demuestran los distintos tipos de cámara en Babylon.js: Órbita Cósmica, La Galería Prohibida, Piloto de Estrellas, El Laberinto del Tiempo y Cazador de Asteroides.">
+        content="Cinco mini-juegos 3D interactivos que demuestran los distintos tipos de cámara en Babylon.js.">
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700;800;900&family=Comic+Neue:wght@400;700&display=swap"
-        rel="stylesheet">
-
-    <!-- Hoja de Estilos de Cómic -->
-    <link rel="stylesheet" href="./comic.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
 
     <!-- Babylon.js CDN -->
     <script src="https://cdn.babylonjs.com/babylon.js"></script>
@@ -23,8 +19,8 @@
     <script src="https://cdn.babylonjs.com/gui/babylon.gui.min.js"></script>
 
     <style>
-        /* Estilos Base */
-        * {
+        /* ─── Reset ─── */
+        *, *::before, *::after {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
@@ -32,224 +28,309 @@
             -webkit-user-select: none;
         }
 
-        html,
-        body {
-            overflow: hidden;
-            width: 100%;
-            height: 100%;
-            background-color: #0b0f19;
-            font-family: 'Inter', sans-serif;
-            color: #f8fafc;
+        :root {
+            --panel-bg:    rgba(10, 10, 14, 0.72);
+            --panel-border: rgba(255, 255, 255, 0.07);
+            --panel-shadow: 0 8px 32px rgba(0,0,0,0.45);
+            --blur: blur(20px);
+            --radius: 14px;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --accent: #e2e8f0;
+            --accent2: #f97316;
+            --font-ui: 'Outfit', sans-serif;
+            --font-body: 'Inter', sans-serif;
         }
 
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #080808;
+            font-family: var(--font-body);
+            color: var(--text-primary);
+        }
+
+        /* ─── Canvas ─── */
         #renderCanvas {
             width: 100%;
             height: 100%;
             display: block;
             outline: none;
+            position: absolute;
+            top: 0; left: 0;
         }
 
-        /* UI Contenedor Principal */
+        /* ─── UI container ─── */
         #ui-container {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            inset: 0;
             pointer-events: none;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            padding: 24px;
             z-index: 10;
         }
 
-        /* Habilitar eventos para elementos interactivos de UI */
-        .interactive {
-            pointer-events: auto;
-        }
+        .interactive { pointer-events: auto; }
 
-        /* Glassmorphism General */
-        .glass-panel {
-            background: rgba(15, 23, 42, 0.55);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 18px 24px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        /* Cabecera */
-        header {
-            align-self: flex-start;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        h1 {
-            font-family: 'Outfit', sans-serif;
-            font-weight: 900;
-            font-size: 1.45rem;
-            letter-spacing: -0.5px;
-            background: linear-gradient(135deg, #f97316, #facc15);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-transform: uppercase;
-        }
-
-        .subtitle {
-            font-size: 0.78rem;
-            color: #94a3b8;
-            font-weight: 500;
-            letter-spacing: 0.5px;
-        }
-
-        /* ─── Selector de Mini-Juegos (Top Center) ─── */
+        /* ════════════════════════════════════════
+           TOP NAV BAR
+        ════════════════════════════════════════ */
         #camera-selector-wrapper {
             position: absolute;
             top: 20px;
             left: 50%;
             transform: translateX(-50%);
             display: flex;
-            gap: 8px;
-            background: rgba(10, 12, 22, 0.7);
-            backdrop-filter: blur(12px);
-            padding: 8px 12px;
-            border-radius: 18px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+            gap: 4px;
+            background: var(--panel-bg);
+            backdrop-filter: var(--blur);
+            -webkit-backdrop-filter: var(--blur);
+            border: 1px solid var(--panel-border);
+            border-radius: 50px;
+            padding: 5px;
+            box-shadow: var(--panel-shadow);
+            pointer-events: auto;
         }
 
         .camera-btn {
-            background: rgba(30, 41, 59, 0.6);
-            border: 1.5px solid rgba(255, 255, 255, 0.07);
-            color: #94a3b8;
-            padding: 9px 16px;
-            border-radius: 12px;
-            font-family: 'Outfit', sans-serif;
-            font-weight: 700;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-family: var(--font-ui);
+            font-weight: 600;
             font-size: 0.8rem;
+            letter-spacing: 0.3px;
             cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 7px;
+            transition: all 0.22s ease;
             white-space: nowrap;
         }
 
         .camera-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: #f1f5f9;
-            border-color: rgba(255, 255, 255, 0.18);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            color: var(--text-primary);
+            background: rgba(255,255,255,0.06);
         }
 
         .camera-btn.active {
-            background: linear-gradient(135deg, #f97316, #eab308);
-            border-color: rgba(255, 255, 255, 0.25);
-            color: #000000;
-            box-shadow: 0 4px 20px rgba(249, 115, 22, 0.45);
-            transform: translateY(-1px);
+            background: rgba(255,255,255,0.12);
+            color: #ffffff;
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.12);
         }
 
-        /* ─── Contenedor Inferior ─── */
+        /* ════════════════════════════════════════
+           BOTTOM BAR
+        ════════════════════════════════════════ */
         #bottom-container {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
             display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            width: 100%;
+            align-items: stretch;
+            gap: 0;
+            padding: 0;
         }
 
-        /* Panel de Información y Controles */
+        /* ─── Info / Instrucciones ─── */
         #info-panel {
-            width: 310px;
+            flex: 1;
+            background: var(--panel-bg);
+            backdrop-filter: var(--blur);
+            -webkit-backdrop-filter: var(--blur);
+            border-top: 1px solid var(--panel-border);
+            border-right: 1px solid var(--panel-border);
+            padding: 22px 32px 24px;
+            pointer-events: auto;
             display: flex;
             flex-direction: column;
             gap: 10px;
         }
 
-        .info-title {
-            font-family: 'Outfit', sans-serif;
-            font-size: 1.05rem;
-            font-weight: 800;
-            color: #f97316;
+        .info-label {
+            font-family: var(--font-ui);
+            font-size: 0.68rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            letter-spacing: 2px;
+            text-transform: uppercase;
             display: flex;
             align-items: center;
             gap: 8px;
+            margin-bottom: 2px;
+        }
+
+        .info-label::before {
+            content: '';
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--accent2);
+            flex-shrink: 0;
+        }
+
+        #camera-title {
+            font-family: var(--font-ui);
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: -0.3px;
         }
 
         .info-desc {
-            font-size: 0.82rem;
+            font-size: 0.97rem;
             color: #cbd5e1;
-            line-height: 1.55;
+            line-height: 1.6;
+            max-width: 600px;
         }
 
         .controls-list {
-            margin-top: 4px;
             display: flex;
-            flex-direction: column;
-            gap: 5px;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 2px;
         }
 
         .control-item {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            font-size: 0.78rem;
-            background: rgba(255, 255, 255, 0.03);
-            padding: 5px 10px;
-            border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.04);
+            gap: 8px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.06);
+            padding: 4px 10px;
+            border-radius: 20px;
         }
 
         .key-badge {
-            background: #1e293b;
-            color: #f8fafc;
-            padding: 2px 7px;
-            border-radius: 5px;
-            font-family: monospace;
-            font-size: 0.72rem;
-            border-bottom: 2px solid #0f172a;
+            background: rgba(255,255,255,0.1);
+            color: #e2e8f0;
+            padding: 1px 7px;
+            border-radius: 4px;
+            font-family: var(--font-ui);
+            font-weight: 600;
+            font-size: 0.73rem;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
         }
 
-        /* ─── Panel de Estadísticas ─── */
+        /* ─── Stats panel ─── */
         #stats-panel {
-            width: 260px;
+            width: 240px;
+            background: var(--panel-bg);
+            backdrop-filter: var(--blur);
+            -webkit-backdrop-filter: var(--blur);
+            border-top: 1px solid var(--panel-border);
+            border-left: 1px solid var(--panel-border);
+            padding: 22px 24px 24px;
+            pointer-events: auto;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 10px;
+        }
+
+        .stats-title {
+            font-family: var(--font-ui);
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-bottom: 4px;
         }
 
         .stat-row {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            font-size: 0.85rem;
+            align-items: baseline;
         }
 
         .stat-label {
-            color: #94a3b8;
-            font-weight: 500;
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            font-weight: 400;
         }
 
         .stat-value {
+            font-family: var(--font-ui);
             font-weight: 700;
-            color: #f97316;
-            font-family: 'Outfit', monospace;
-            font-size: 1rem;
-            transition: transform 0.15s ease;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            transition: transform 0.12s ease, color 0.12s ease;
         }
 
         .stat-value.pop {
-            transform: scale(1.35);
-            color: #facc15;
+            transform: scale(1.2);
+            color: var(--accent2);
         }
 
-        /* ─── Overlay de disparo (giroscopio) ─── */
+        /* ─── Controls inside stats ─── */
+        .stat-control-btn {
+            flex: 1;
+            padding: 5px 0;
+            font-size: 0.72rem;
+            font-family: var(--font-ui);
+            font-weight: 600;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 6px;
+            background: rgba(255,255,255,0.04);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.18s ease;
+        }
+        .stat-control-btn:hover {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+        }
+
+        .stat-select {
+            width: 100%;
+            border-radius: 8px;
+            padding: 6px 8px;
+            background: rgba(255,255,255,0.04);
+            color: var(--text-primary);
+            border: 1px solid rgba(255,255,255,0.08);
+            font-family: var(--font-body);
+            font-size: 0.78rem;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .stat-select option {
+            background: #1e293b;
+        }
+
+        .stat-slider {
+            width: 100%;
+            -webkit-appearance: none;
+            height: 3px;
+            border-radius: 2px;
+            background: rgba(255,255,255,0.12);
+            outline: none;
+            accent-color: var(--accent2);
+        }
+
+        .speedometer-container {
+            width: 100%;
+            height: 3px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+
+        .speedometer-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981, #f97316, #ef4444);
+            border-radius: 2px;
+            transition: width 0.2s ease;
+            width: 0%;
+        }
+
+        /* ════════════════════════════════════════
+           CROSSHAIR / SHOOT (DeviceOrientation)
+        ════════════════════════════════════════ */
         #action-overlay {
             position: absolute;
             top: 50%;
@@ -258,332 +339,255 @@
             display: none;
             flex-direction: column;
             align-items: center;
-            gap: 16px;
+            gap: 20px;
+            pointer-events: none;
         }
 
         .crosshair {
-            width: 28px;
-            height: 28px;
-            border: 2px solid rgba(249, 115, 22, 0.85);
+            width: 22px;
+            height: 22px;
+            border: 1.5px solid rgba(255,255,255,0.7);
             border-radius: 50%;
             position: relative;
-            box-shadow: 0 0 12px rgba(249, 115, 22, 0.6);
         }
 
-        .crosshair::before,
-        .crosshair::after {
+        .crosshair::before, .crosshair::after {
             content: '';
             position: absolute;
-            background: rgba(249, 115, 22, 0.85);
+            background: rgba(255,255,255,0.7);
         }
 
         .crosshair::before {
-            top: 11px;
-            left: -10px;
-            width: 48px;
-            height: 2px;
+            top: 9px; left: -10px;
+            width: 42px; height: 1px;
         }
 
         .crosshair::after {
-            left: 11px;
-            top: -10px;
-            width: 2px;
-            height: 48px;
+            left: 9px; top: -10px;
+            width: 1px; height: 42px;
         }
 
         .shoot-btn {
-            background: radial-gradient(circle, #f97316 0%, #b91c1c 100%);
-            color: white;
-            border: 2.5px solid rgba(255, 255, 255, 0.25);
-            width: 86px;
-            height: 86px;
+            pointer-events: auto;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: var(--blur);
+            color: #ffffff;
+            border: 1px solid rgba(255,255,255,0.15);
+            width: 76px;
+            height: 76px;
             border-radius: 50%;
-            font-family: 'Outfit', sans-serif;
-            font-weight: 900;
-            font-size: 0.9rem;
-            cursor: pointer;
-            box-shadow: 0 8px 28px rgba(249, 115, 22, 0.5);
-            transition: all 0.1s ease;
-            text-transform: uppercase;
+            font-family: var(--font-ui);
+            font-weight: 700;
+            font-size: 0.72rem;
             letter-spacing: 1px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.15s ease;
         }
 
-        .shoot-btn:active {
-            transform: scale(0.9);
-            box-shadow: 0 4px 14px rgba(249, 115, 22, 0.25);
-        }
+        .shoot-btn:hover  { background: rgba(255,255,255,0.18); }
+        .shoot-btn:active { transform: scale(0.92); }
 
-        /* ─── Pantalla de Carga ─── */
+        /* ════════════════════════════════════════
+           LOADER
+        ════════════════════════════════════════ */
         #loader {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #090d16, #0f1829);
+            position: fixed;
+            inset: 0;
+            background: #080808;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            z-index: 100;
+            gap: 20px;
+            z-index: 200;
             transition: opacity 0.5s ease;
         }
 
+        .loader-wordmark {
+            font-family: var(--font-ui);
+            font-weight: 700;
+            font-size: 1rem;
+            color: rgba(255,255,255,0.2);
+            letter-spacing: 4px;
+            text-transform: uppercase;
+        }
+
         .spinner {
-            width: 56px;
-            height: 56px;
-            border: 3px solid rgba(249, 115, 22, 0.15);
+            width: 36px;
+            height: 36px;
+            border: 2px solid rgba(255,255,255,0.08);
             border-radius: 50%;
-            border-top-color: #f97316;
-            animation: spin 0.9s ease-in-out infinite;
-            margin-bottom: 22px;
+            border-top-color: rgba(255,255,255,0.5);
+            animation: spin 0.9s linear infinite;
         }
 
         .loader-text {
-            font-family: 'Outfit', sans-serif;
-            font-size: 1rem;
-            color: #94a3b8;
+            font-family: var(--font-body);
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.3);
             letter-spacing: 2px;
             text-transform: uppercase;
         }
 
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* ─── Overlay de Victoria ─── */
-        #victory-overlay {
+        /* ════════════════════════════════════════
+           VICTORY / GAME OVER OVERLAYS
+        ════════════════════════════════════════ */
+        #victory-overlay, #gameover-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.75);
-            backdrop-filter: blur(4px);
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(10px);
             display: none;
             justify-content: center;
             align-items: center;
-            z-index: 50;
-            flex-direction: column;
+            z-index: 100;
         }
 
-        .victory-card {
-            background: linear-gradient(135deg, #14532d, #065f46);
-            border: 4px solid #22c55e;
-            border-radius: 24px;
-            padding: 40px 56px;
+        .victory-card, .gameover-card {
+            background: rgba(15,15,20,0.9);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 44px 52px;
             text-align: center;
-            box-shadow: 0 0 60px rgba(34, 197, 94, 0.4), 0 20px 60px rgba(0, 0, 0, 0.6);
-            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+            animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            min-width: 360px;
         }
 
         .victory-card h2 {
-            font-family: 'Outfit', sans-serif;
-            font-size: 3.5rem;
-            font-weight: 900;
-            color: #22c55e;
-            text-shadow: 0 0 30px rgba(34, 197, 94, 0.7);
-            letter-spacing: 2px;
-            margin-bottom: 12px;
-        }
-
-        .victory-card p {
-            font-size: 1.1rem;
-            color: #bbf7d0;
-            margin-bottom: 8px;
-        }
-
-        .victory-score-display {
-            font-family: 'Outfit', sans-serif;
+            font-family: var(--font-ui);
             font-size: 2rem;
-            font-weight: 900;
-            color: #facc15;
-            margin: 12px 0 20px;
-        }
-
-        .victory-record {
-            font-size: 0.9rem;
-            color: #86efac;
-            margin-bottom: 24px;
-            font-weight: 600;
-        }
-
-        /* ─── Overlay de Game Over ─── */
-        #gameover-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(4px);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 50;
-            flex-direction: column;
-        }
-
-        .gameover-card {
-            background: linear-gradient(135deg, #450a0a, #7f1d1d);
-            border: 4px solid #ef4444;
-            border-radius: 24px;
-            padding: 40px 56px;
-            text-align: center;
-            box-shadow: 0 0 60px rgba(239, 68, 68, 0.4), 0 20px 60px rgba(0, 0, 0, 0.6);
-            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            font-weight: 800;
+            color: #4ade80;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
         }
 
         .gameover-card h2 {
-            font-family: 'Outfit', sans-serif;
-            font-size: 3.5rem;
-            font-weight: 900;
-            color: #ef4444;
-            text-shadow: 0 0 30px rgba(239, 68, 68, 0.7);
-            letter-spacing: 2px;
-            margin-bottom: 12px;
-        }
-
-        .gameover-card p {
-            font-size: 1.05rem;
-            color: #fca5a5;
-            margin-bottom: 8px;
-        }
-
-        .gameover-score-display {
-            font-family: 'Outfit', sans-serif;
+            font-family: var(--font-ui);
             font-size: 2rem;
-            font-weight: 900;
-            color: #facc15;
-            margin: 12px 0 8px;
+            font-weight: 800;
+            color: #f87171;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
         }
 
-        .gameover-record {
+        .victory-card p, .gameover-card p {
             font-size: 0.9rem;
-            color: #fca5a5;
-            margin-bottom: 24px;
-            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
         }
 
-        /* Botón cómic de acción */
+        .victory-score-display, .gameover-score-display {
+            font-family: var(--font-ui);
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #ffffff;
+            margin: 8px 0 6px;
+        }
+
+        .victory-record, .gameover-record {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            margin-bottom: 28px;
+            letter-spacing: 0.3px;
+        }
+
+        .overlay-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
         .action-btn {
-            font-family: 'Outfit', sans-serif;
-            font-weight: 900;
-            font-size: 1rem;
-            padding: 12px 32px;
-            border-radius: 12px;
+            font-family: var(--font-ui);
+            font-weight: 600;
+            font-size: 0.8rem;
+            padding: 10px 24px;
+            border-radius: 50px;
             cursor: pointer;
-            border: 3px solid rgba(0, 0, 0, 0.3);
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            transition: transform 0.15s ease, box-shadow 0.15s ease;
-            margin: 0 6px;
+            border: 1px solid rgba(255,255,255,0.12);
+            letter-spacing: 0.5px;
+            transition: all 0.2s ease;
         }
 
-        .action-btn:hover {
-            transform: translateY(-2px) scale(1.04);
-        }
+        .action-btn:hover { transform: translateY(-1px); opacity: 0.9; }
 
-        .action-btn:active {
-            transform: scale(0.96);
-        }
-
-        .btn-green {
-            background: linear-gradient(135deg, #22c55e, #16a34a);
-            color: #fff;
-            box-shadow: 0 4px 20px rgba(34, 197, 94, 0.4);
-        }
-
-        .btn-red {
-            background: linear-gradient(135deg, #ef4444, #b91c1c);
-            color: #fff;
-            box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4);
-        }
-
-        .btn-orange {
-            background: linear-gradient(135deg, #f97316, #b45309);
-            color: #fff;
-            box-shadow: 0 4px 20px rgba(249, 115, 22, 0.4);
-        }
+        .btn-green  { background: rgba(74,222,128,0.15); color: #4ade80; }
+        .btn-red    { background: rgba(248,113,113,0.15); color: #f87171; }
+        .btn-orange { background: rgba(249,115,22,0.15);  color: #fb923c; }
 
         @keyframes popIn {
-            from {
-                transform: scale(0.6);
-                opacity: 0;
-            }
-
-            to {
-                transform: scale(1);
-                opacity: 1;
-            }
+            from { opacity: 0; transform: scale(0.92) translateY(8px); }
+            to   { opacity: 1; transform: scale(1) translateY(0); }
         }
 
-        /* Barra de velocidad */
-        .speedometer-container {
-            width: 100%;
-            height: 6px;
-            background: rgba(255, 255, 255, 0.08);
-            border-radius: 4px;
+        /* ─── Popup flotante ─── */
+        #popup-overlay {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 50;
             overflow: hidden;
-            margin-top: 4px;
         }
 
-        .speedometer-bar {
-            height: 100%;
-            background: linear-gradient(90deg, #22c55e, #f97316, #ef4444);
-            border-radius: 4px;
-            transition: width 0.2s ease;
+        .floating-comic-text {
+            position: absolute;
+            font-family: var(--font-ui);
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: #ffffff;
+            pointer-events: none;
+            transform: translate(-50%, -50%) scale(0.5);
+            animation: floatUp 0.75s ease forwards;
+            letter-spacing: -0.5px;
+            text-shadow: 0 2px 12px rgba(0,0,0,0.5);
         }
 
-        /* Responsividad */
+        @keyframes floatUp {
+            0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.6); }
+            20%  { opacity: 1; transform: translate(-50%, -60%) scale(1.05); }
+            80%  { opacity: 1; }
+            100% { opacity: 0; transform: translate(-50%, -80%) scale(1); }
+        }
+
+        /* ─── Confetti ─── */
+        .confetti {
+            position: absolute;
+            width: 6px; height: 10px;
+            opacity: 0.85;
+            z-index: 110;
+            pointer-events: none;
+            animation: fall 2.5s linear forwards;
+        }
+
+        @keyframes fall {
+            from { transform: translateY(-20px) rotate(0deg); opacity: 0.85; }
+            to   { transform: translateY(100vh)  rotate(480deg); opacity: 0; }
+        }
+
+        /* ─── Responsive ─── */
         @media (max-width: 768px) {
-            #ui-container {
-                padding: 14px;
-            }
-
             #camera-selector-wrapper {
                 top: auto;
-                bottom: 20px;
+                bottom: 190px;
                 left: 50%;
                 transform: translateX(-50%);
-                width: calc(100% - 28px);
                 overflow-x: auto;
-                padding-bottom: 6px;
-                justify-content: flex-start;
-            }
-
-            .camera-btn {
-                padding: 8px 12px;
-                font-size: 0.75rem;
+                max-width: calc(100vw - 24px);
             }
 
             #bottom-container {
                 flex-direction: column;
-                align-items: center;
-                gap: 14px;
-                margin-bottom: 68px;
             }
 
-            #info-panel,
             #stats-panel {
                 width: 100%;
-            }
-
-            header {
-                width: 100%;
-                margin-bottom: 10px;
-            }
-
-            .victory-card,
-            .gameover-card {
-                padding: 28px 32px;
-            }
-
-            .victory-card h2,
-            .gameover-card h2 {
-                font-size: 2.5rem;
+                border-left: none;
+                border-top: 1px solid var(--panel-border);
             }
         }
     </style>
@@ -592,98 +596,85 @@
 <body>
     <!-- Pantalla de Carga -->
     <div id="loader">
+        <div class="loader-wordmark">Babylon.js</div>
         <div class="spinner"></div>
-        <div class="loader-text">Iniciando Motor 3D...</div>
+        <div class="loader-text">Iniciando motor 3D</div>
     </div>
 
     <!-- Canvas de Babylon.js -->
     <canvas id="renderCanvas"></canvas>
 
-    <!-- Contenedor UI de la aplicación -->
+    <!-- Contenedor UI -->
     <div id="ui-container">
-        <!-- Selector de Mini-Juegos -->
+
+        <!-- Selector de escenas (Top Center) -->
         <div id="camera-selector-wrapper" class="interactive">
-            <button class="camera-btn active" id="btn-scene-arcRotate" data-camera="arcRotate">
-                Órbita Cósmica
-            </button>
-            <button class="camera-btn" id="btn-scene-free" data-camera="free">
-                Galería Prohibida
-            </button>
-            <button class="camera-btn" id="btn-scene-follow" data-camera="follow">
-                Piloto de Estrellas
-            </button>
-            <button class="camera-btn" id="btn-scene-anaglyph" data-camera="anaglyph">
-                Laberinto del Tiempo
-            </button>
-            <button class="camera-btn" id="btn-scene-deviceOrientation" data-camera="deviceOrientation">
-                Cazador de Asteroides
-            </button>
+            <button class="camera-btn active" id="btn-scene-arcRotate" data-camera="arcRotate">Orbita Cosmica</button>
+            <button class="camera-btn" id="btn-scene-free" data-camera="free">Galeria Prohibida</button>
+            <button class="camera-btn" id="btn-scene-follow" data-camera="follow">Piloto de Estrellas</button>
+            <button class="camera-btn" id="btn-scene-anaglyph" data-camera="anaglyph">Laberinto del Tiempo</button>
+            <button class="camera-btn" id="btn-scene-deviceOrientation" data-camera="deviceOrientation">Cazador de Asteroides</button>
         </div>
 
-        <!-- Punto de Mira para Tiro al Blanco (Oculto por defecto) -->
+        <!-- Mira (DeviceOrientation) -->
         <div id="action-overlay">
             <div class="crosshair"></div>
             <button class="shoot-btn interactive" id="btn-shoot">FUEGO</button>
         </div>
 
-        <!-- Contenedor Inferior -->
+        <!-- Barra inferior -->
         <div id="bottom-container">
-            <!-- Panel de Información de la Cámara Activa -->
-            <div id="info-panel" class="glass-panel interactive">
-                <div class="info-title">
-                    <span id="camera-icon">🪐</span>
-                    <span id="camera-title">Órbita Cósmica</span>
-                </div>
+            <!-- Instrucciones -->
+            <div id="info-panel" class="interactive">
+                <div class="info-label">Camara activa<span id="camera-icon"></span></div>
+                <div id="camera-title">Orbita Cosmica</div>
                 <p class="info-desc" id="camera-desc">
                     Orbita el sistema solar. Haz clic en los planetas para visitarlos.
                 </p>
-                <div class="controls-list" id="camera-controls">
-                    <!-- Dinámico -->
-                </div>
+                <div class="controls-list" id="camera-controls"></div>
             </div>
 
-            <!-- Panel de Estadísticas -->
-            <div id="stats-panel" class="glass-panel interactive">
-                <div class="info-title" style="font-size:0.9rem; margin-bottom:4px;">📊 Estadísticas</div>
-                <div id="scene-stats">
-                    <!-- Dinámico -->
-                </div>
+            <!-- Estadisticas -->
+            <div id="stats-panel" class="interactive">
+                <div class="stats-title">Estadisticas</div>
+                <div id="scene-stats"></div>
             </div>
         </div>
+
     </div>
 
-    <!-- Overlays para Efectos Cómic / Palabras flotantes -->
+    <!-- Popups flotantes -->
     <div id="popup-overlay"></div>
 
     <!-- Overlay de Victoria -->
-    <div id="victory-overlay">
+    <div id="victory-overlay" style="display:none; flex-direction:column;">
         <div class="victory-card">
-            <h2 id="victory-title">¡VICTORIA!</h2>
-            <p id="victory-message">¡Objetivo completado!</p>
+            <h2 id="victory-title">VICTORIA</h2>
+            <p id="victory-message">Objetivo completado</p>
             <div class="victory-score-display" id="victory-score">0 pts</div>
             <div class="victory-record" id="victory-record"></div>
-            <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
-                <button class="action-btn btn-orange interactive" id="btn-victory-replay">🔄 JUGAR DE NUEVO</button>
-                <button class="action-btn btn-green interactive" id="btn-victory-close">✓ CONTINUAR</button>
+            <div class="overlay-actions">
+                <button class="action-btn btn-orange interactive" id="btn-victory-replay">Jugar de nuevo</button>
+                <button class="action-btn btn-green interactive" id="btn-victory-close">Continuar</button>
             </div>
         </div>
     </div>
 
     <!-- Overlay de Game Over -->
-    <div id="gameover-overlay">
+    <div id="gameover-overlay" style="display:none; flex-direction:column;">
         <div class="gameover-card">
-            <h2 id="gameover-title">¡GAME OVER!</h2>
-            <p id="gameover-message">Se acabó el tiempo.</p>
+            <h2 id="gameover-title">GAME OVER</h2>
+            <p id="gameover-message">Se acabo el tiempo.</p>
             <div class="gameover-score-display" id="gameover-score">0 pts</div>
             <div class="gameover-record" id="gameover-record"></div>
-            <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
-                <button class="action-btn btn-red interactive" id="btn-gameover-retry">🔄 REINTENTAR</button>
-                <button class="action-btn btn-orange interactive" id="btn-gameover-close">✗ CERRAR</button>
+            <div class="overlay-actions">
+                <button class="action-btn btn-red interactive" id="btn-gameover-retry">Reintentar</button>
+                <button class="action-btn btn-orange interactive" id="btn-gameover-close">Cerrar</button>
             </div>
         </div>
     </div>
 
-    <!-- Script de Entrada Principal -->
+    <!-- Script principal -->
     <script type="module" src="./src/main.js"></script>
 </body>
 

@@ -35,8 +35,8 @@ export const ASSETS_CONFIG = {
             bands: 12
         },
         museumFloor: {
-            primary: '#1e293b',
-            secondary: '#0f172a',
+            primary: '#f1f5f9',
+            secondary: '#cbd5e1',
             gridSize: 256
         },
         stars: {

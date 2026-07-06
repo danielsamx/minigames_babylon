@@ -179,7 +179,7 @@ export class SceneDeviceOrientation {
                 // Burbuja de impacto
                 const hits = ['¡PUM!', '¡BOOM!', '¡ZAS!', '¡KABOOM!', '¡PLAF!'];
                 let text = hits[Math.floor(Math.random() * hits.length)];
-                if (this.streak >= 3) text = `🔥 RACHA x${this.streak}!`;
+                if (this.streak >= 3) text = `RACHA x${this.streak}!`;
                 this.sceneManager.uiController.showFloatingBubbleAt3D(text, hitPos, this.scene);
 
                 asteroid.explode().then(() => {
