@@ -49,6 +49,15 @@ export class SceneManager {
             this.engine.resize();
         });
 
+        // Observe scene-area container for layout-driven resizes
+        const sceneArea = document.getElementById('scene-area');
+        if (sceneArea) {
+            const ro = new ResizeObserver(() => {
+                this.engine.resize();
+            });
+            ro.observe(sceneArea);
+        }
+
         // Inicializar UIController
         this.uiController = new UIController(this);
 

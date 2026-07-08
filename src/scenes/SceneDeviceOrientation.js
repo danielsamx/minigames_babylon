@@ -102,11 +102,21 @@ export class SceneDeviceOrientation {
     }
 
     setupInputEvents() {
+        // Existing input events
         const shootBtn = document.getElementById('btn-shoot');
         if (shootBtn) shootBtn.addEventListener('click', this.onShootBind);
 
         this.onKeyDown = (e) => {
             if (e.keyCode === 32) { e.preventDefault(); this.shootLaser(); }
+            // Manual victory (V) and game over (G) shortcuts for testing
+            if (e.key === 'v' || e.key === 'V') {
+                if (this.sceneManager.audioManager) this.sceneManager.audioManager.playVictory();
+                if (this.sceneManager.uiController) this.sceneManager.uiController.triggerVictory('¡Victoria!', this.score, 'deviceOrientation');
+            }
+            if (e.key === 'g' || e.key === 'G') {
+                if (this.sceneManager.audioManager) this.sceneManager.audioManager.playGameOver();
+                if (this.sceneManager.uiController) this.sceneManager.uiController.triggerGameOver('Game Over', this.score, 'deviceOrientation');
+            }
         };
         window.addEventListener('keydown', this.onKeyDown);
 

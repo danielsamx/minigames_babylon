@@ -29,8 +29,8 @@
         }
 
         :root {
-            --panel-bg:    rgba(25, 25, 35, 0.85);
-            --panel-border: rgba(255, 255, 255, 0.15);
+            --panel-bg:    rgba(16, 16, 24, 0.95);
+            --panel-border: rgba(255, 255, 255, 0.08);
             --panel-shadow: 0 8px 32px rgba(0,0,0,0.55);
             --blur: blur(20px);
             --radius: 14px;
@@ -40,6 +40,7 @@
             --accent2: #f97316;
             --font-ui: 'Outfit', sans-serif;
             --font-body: 'Inter', sans-serif;
+            --sidebar-width: 290px;
         }
 
         html, body {
@@ -51,17 +52,28 @@
             color: var(--text-primary);
         }
 
+        /* ─── Main Layout: scene + sidebar side by side ─── */
+        #app-layout {
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
+
+        #scene-area {
+            flex: 1;
+            position: relative;
+            min-width: 0;
+        }
+
         /* ─── Canvas ─── */
         #renderCanvas {
             width: 100%;
             height: 100%;
             display: block;
             outline: none;
-            position: absolute;
-            top: 0; left: 0;
         }
 
-        /* ─── UI container ─── */
+        /* ─── UI container (overlays on top of canvas) ─── */
         #ui-container {
             position: absolute;
             inset: 0;
@@ -76,17 +88,17 @@
         ════════════════════════════════════════ */
         #camera-selector-wrapper {
             position: absolute;
-            top: 20px;
+            top: 16px;
             left: 50%;
             transform: translateX(-50%);
             display: flex;
-            gap: 4px;
-            background: var(--panel-bg);
+            gap: 3px;
+            background: rgba(12, 12, 20, 0.8);
             backdrop-filter: var(--blur);
             -webkit-backdrop-filter: var(--blur);
             border: 1px solid var(--panel-border);
             border-radius: 50px;
-            padding: 5px;
+            padding: 4px;
             box-shadow: var(--panel-shadow);
             pointer-events: auto;
         }
@@ -95,11 +107,11 @@
             background: transparent;
             border: none;
             color: var(--text-secondary);
-            padding: 8px 20px;
+            padding: 7px 18px;
             border-radius: 50px;
             font-family: var(--font-ui);
             font-weight: 600;
-            font-size: 0.8rem;
+            font-size: 0.78rem;
             letter-spacing: 0.3px;
             cursor: pointer;
             transition: all 0.22s ease;
@@ -118,126 +130,136 @@
         }
 
         /* ════════════════════════════════════════
-           BOTTOM BAR
+           SIDEBAR
         ════════════════════════════════════════ */
-        #bottom-container {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            display: flex;
-            align-items: stretch;
-            gap: 0;
-            padding: 0;
-        }
-
-        /* ─── Info / Instrucciones ─── */
-        #info-panel {
-            flex: 1;
-            background: var(--panel-bg);
-            backdrop-filter: var(--blur);
-            -webkit-backdrop-filter: var(--blur);
-            border-top: 1px solid var(--panel-border);
-            border-right: 1px solid var(--panel-border);
-            padding: 22px 32px 24px;
-            pointer-events: auto;
+        #sidebar {
+            width: var(--sidebar-width);
+            min-width: var(--sidebar-width);
+            height: 100%;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            background: var(--panel-bg);
+            border-left: 1px solid var(--panel-border);
+            overflow-y: auto;
+            overflow-x: hidden;
+            z-index: 20;
+        }
+
+        /* Scrollbar styling */
+        #sidebar::-webkit-scrollbar {
+            width: 4px;
+        }
+        #sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        #sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+        }
+
+        /* ─── Sidebar: Info Section ─── */
+        #info-panel {
+            padding: 20px 20px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            border-bottom: 1px solid var(--panel-border);
         }
 
         .info-label {
             font-family: var(--font-ui);
-            font-size: 0.68rem;
+            font-size: 0.62rem;
             font-weight: 600;
-            color: var(--text-secondary);
-            letter-spacing: 2px;
+            color: var(--accent2);
+            letter-spacing: 2.5px;
             text-transform: uppercase;
             display: flex;
             align-items: center;
-            gap: 8px;
-            margin-bottom: 2px;
+            gap: 7px;
         }
 
         .info-label::before {
             content: '';
             display: inline-block;
-            width: 6px;
-            height: 6px;
+            width: 5px;
+            height: 5px;
             border-radius: 50%;
             background: var(--accent2);
             flex-shrink: 0;
+            box-shadow: 0 0 6px var(--accent2);
         }
 
         #camera-title {
             font-family: var(--font-ui);
-            font-size: 1.15rem;
+            font-size: 1.1rem;
             font-weight: 700;
             color: #ffffff;
             letter-spacing: -0.3px;
+            line-height: 1.3;
         }
 
         .info-desc {
-            font-size: 0.97rem;
-            color: #cbd5e1;
-            line-height: 1.6;
-            max-width: 600px;
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            line-height: 1.55;
         }
 
+        /* Controls list */
         .controls-list {
             display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            margin-top: 2px;
+            flex-direction: column;
+            gap: 5px;
+            margin-top: 4px;
         }
 
         .control-item {
             display: flex;
             align-items: center;
             gap: 8px;
-            font-size: 0.8rem;
+            font-size: 0.72rem;
             color: var(--text-secondary);
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,255,255,0.06);
-            padding: 4px 10px;
-            border-radius: 20px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.05);
+            padding: 5px 10px;
+            border-radius: 8px;
+            transition: background 0.15s ease;
+        }
+
+        .control-item:hover {
+            background: rgba(255,255,255,0.06);
         }
 
         .key-badge {
             background: rgba(255,255,255,0.1);
-            color: #e2e8f0;
-            padding: 1px 7px;
+            color: #cbd5e1;
+            padding: 2px 7px;
             border-radius: 4px;
             font-family: var(--font-ui);
             font-weight: 600;
-            font-size: 0.73rem;
+            font-size: 0.68rem;
             letter-spacing: 0.3px;
             white-space: nowrap;
+            flex-shrink: 0;
         }
 
-        /* ─── Stats panel ─── */
+        /* ─── Sidebar: Stats Section ─── */
         #stats-panel {
-            width: 240px;
-            background: var(--panel-bg);
-            backdrop-filter: var(--blur);
-            -webkit-backdrop-filter: var(--blur);
-            border-top: 1px solid var(--panel-border);
-            border-left: 1px solid var(--panel-border);
-            padding: 22px 24px 24px;
-            pointer-events: auto;
+            padding: 16px 20px 20px;
             display: flex;
             flex-direction: column;
             gap: 10px;
+            flex: 1;
         }
 
         .stats-title {
             font-family: var(--font-ui);
-            font-size: 0.72rem;
+            font-size: 0.62rem;
             font-weight: 600;
             color: var(--text-secondary);
-            letter-spacing: 1.5px;
+            letter-spacing: 2.5px;
             text-transform: uppercase;
-            margin-bottom: 4px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
         }
 
         .stat-row {
@@ -247,7 +269,7 @@
         }
 
         .stat-label {
-            font-size: 0.78rem;
+            font-size: 0.76rem;
             color: var(--text-secondary);
             font-weight: 400;
         }
@@ -255,7 +277,7 @@
         .stat-value {
             font-family: var(--font-ui);
             font-weight: 700;
-            font-size: 0.95rem;
+            font-size: 0.92rem;
             color: var(--text-primary);
             transition: transform 0.12s ease, color 0.12s ease;
         }
@@ -268,8 +290,8 @@
         /* ─── Controls inside stats ─── */
         .stat-control-btn {
             flex: 1;
-            padding: 5px 0;
-            font-size: 0.72rem;
+            padding: 6px 0;
+            font-size: 0.7rem;
             font-family: var(--font-ui);
             font-weight: 600;
             border: 1px solid rgba(255,255,255,0.08);
@@ -282,19 +304,24 @@
         .stat-control-btn:hover {
             background: rgba(255,255,255,0.1);
             color: #fff;
+            border-color: rgba(255,255,255,0.15);
         }
 
         .stat-select {
             width: 100%;
             border-radius: 8px;
-            padding: 6px 8px;
+            padding: 7px 10px;
             background: rgba(255,255,255,0.04);
             color: var(--text-primary);
             border: 1px solid rgba(255,255,255,0.08);
             font-family: var(--font-body);
-            font-size: 0.78rem;
+            font-size: 0.76rem;
             cursor: pointer;
             outline: none;
+            transition: border-color 0.15s ease;
+        }
+        .stat-select:focus {
+            border-color: rgba(255,255,255,0.2);
         }
 
         .stat-select option {
@@ -571,23 +598,33 @@
 
         /* ─── Responsive ─── */
         @media (max-width: 768px) {
+            :root {
+                --sidebar-width: 100%;
+            }
+
+            #app-layout {
+                flex-direction: column;
+            }
+
+            #scene-area {
+                flex: 1;
+            }
+
+            #sidebar {
+                width: 100%;
+                min-width: 100%;
+                max-height: 40vh;
+                border-left: none;
+                border-top: 1px solid var(--panel-border);
+            }
+
             #camera-selector-wrapper {
                 top: auto;
-                bottom: 190px;
+                bottom: 42vh;
                 left: 50%;
                 transform: translateX(-50%);
                 overflow-x: auto;
                 max-width: calc(100vw - 24px);
-            }
-
-            #bottom-container {
-                flex-direction: column;
-            }
-
-            #stats-panel {
-                width: 100%;
-                border-left: none;
-                border-top: 1px solid var(--panel-border);
             }
         }
     </style>
@@ -601,42 +638,49 @@
         <div class="loader-text">Iniciando motor 3D</div>
     </div>
 
-    <!-- Canvas de Babylon.js -->
-    <canvas id="renderCanvas"></canvas>
+    <!-- Layout principal: escena + sidebar -->
+    <div id="app-layout">
 
-    <!-- Contenedor UI -->
-    <div id="ui-container">
+        <!-- Zona de la escena (canvas + overlays) -->
+        <div id="scene-area">
+            <canvas id="renderCanvas"></canvas>
 
-        <!-- Selector de escenas (Top Center) -->
-        <div id="camera-selector-wrapper" class="interactive">
-            <button class="camera-btn active" id="btn-scene-arcRotate" data-camera="arcRotate">Orbita Cosmica</button>
-            <button class="camera-btn" id="btn-scene-free" data-camera="free">Galeria Prohibida</button>
-            <button class="camera-btn" id="btn-scene-follow" data-camera="follow">Piloto de Estrellas</button>
-            <button class="camera-btn" id="btn-scene-anaglyph" data-camera="anaglyph">Laberinto del Tiempo</button>
-            <button class="camera-btn" id="btn-scene-deviceOrientation" data-camera="deviceOrientation">Cazador de Asteroides</button>
+            <!-- Contenedor UI (overlays flotantes sobre el canvas) -->
+            <div id="ui-container">
+
+                <!-- Selector de escenas (Top Center) -->
+                <div id="camera-selector-wrapper" class="interactive">
+                    <button class="camera-btn active" id="btn-scene-arcRotate" data-camera="arcRotate">Orbita Cosmica</button>
+                    <button class="camera-btn" id="btn-scene-free" data-camera="free">Galeria Prohibida</button>
+                    <button class="camera-btn" id="btn-scene-follow" data-camera="follow">Piloto de Estrellas</button>
+                    <button class="camera-btn" id="btn-scene-anaglyph" data-camera="anaglyph">Laberinto del Tiempo</button>
+                    <button class="camera-btn" id="btn-scene-deviceOrientation" data-camera="deviceOrientation">Cazador de Asteroides</button>
+                </div>
+
+                <!-- Mira (DeviceOrientation) -->
+                <div id="action-overlay">
+                    <div class="crosshair"></div>
+                    <button class="shoot-btn interactive" id="btn-shoot">FUEGO</button>
+                </div>
+
+            </div>
         </div>
 
-        <!-- Mira (DeviceOrientation) -->
-        <div id="action-overlay">
-            <div class="crosshair"></div>
-            <button class="shoot-btn interactive" id="btn-shoot">FUEGO</button>
-        </div>
-
-        <!-- Barra inferior -->
-        <div id="bottom-container">
+        <!-- Barra lateral -->
+        <div id="sidebar" class="interactive">
             <!-- Instrucciones -->
-            <div id="info-panel" class="interactive">
-                <div class="info-label">Camara activa<span id="camera-icon"></span></div>
-                <div id="camera-title">Orbita Cosmica</div>
+            <div id="info-panel">
+                <div class="info-label">Cámara activa<span id="camera-icon"></span></div>
+                <div id="camera-title">Órbita Cósmica</div>
                 <p class="info-desc" id="camera-desc">
                     Orbita el sistema solar. Haz clic en los planetas para visitarlos.
                 </p>
                 <div class="controls-list" id="camera-controls"></div>
             </div>
 
-            <!-- Estadisticas -->
-            <div id="stats-panel" class="interactive">
-                <div class="stats-title">Estadisticas</div>
+            <!-- Estadísticas -->
+            <div id="stats-panel">
+                <div class="stats-title">Estadísticas</div>
                 <div id="scene-stats"></div>
             </div>
         </div>
