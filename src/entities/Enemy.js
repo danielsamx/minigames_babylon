@@ -57,19 +57,19 @@ export class Enemy {
         // ── Material realista: roca espacial ──────────────────────────────────
         const mat = new BABYLON.StandardMaterial(`${this.id}Mat`, this.scene);
 
-        // Colores naturales de roca oscura con variación
-        const hue = 0.35 + Math.random() * 0.15;
-        mat.diffuseColor  = new BABYLON.Color3(hue, hue * 0.9, hue * 0.8);
-        mat.specularColor = new BABYLON.Color3(0.12, 0.10, 0.08);
-        mat.specularPower = 8;
-        mat.ambientColor  = new BABYLON.Color3(0.04, 0.04, 0.05);
+        // Color azul celeste para asteroides
+        const blueColor = BABYLON.Color3.FromHexString('#66b2ff');
+        mat.diffuseColor = blueColor;
+        mat.specularColor = new BABYLON.Color3(0.15, 0.15, 0.20);
+        mat.specularPower = 12;
+        mat.ambientColor = new BABYLON.Color3(0.05, 0.05, 0.10);
 
         // Textura procedural de roca (uso de DynamicTexture con ruido)
         const texSize = 256;
         const rockTex = new BABYLON.DynamicTexture(`${this.id}Tex`, { width: texSize, height: texSize }, this.scene, false);
         const ctx = rockTex.getContext();
-        // Base oscura
-        ctx.fillStyle = `rgb(${Math.floor(hue*200)},${Math.floor(hue*185)},${Math.floor(hue*165)})`;
+        // Base azul celeste
+        ctx.fillStyle = `rgb(${Math.floor(blueColor.r * 255)},${Math.floor(blueColor.g * 255)},${Math.floor(blueColor.b * 255)})`;
         ctx.fillRect(0, 0, texSize, texSize);
         // Puntos de variación para simular cráteres y rugosidad
         for (let i = 0; i < 320; i++) {
@@ -89,7 +89,10 @@ export class Enemy {
         // Desactivar lighting false (activar iluminación real)
         mat.disableLighting = false;
 
-        this.mesh.material = mat;
+        // Aseguramos que el asteroide sea pickable y aumentamos su tamaño para facilitar el disparo
+        this.mesh.isPickable = true;
+        // Incrementamos el escalado visual (1.5x) sin alterar la lógica de colisión
+        this.mesh.scaling = new BABYLON.Vector3(1.5, 1.5, 1.5);
 
         // Contorno suave
         this.mesh.renderOutline = true;

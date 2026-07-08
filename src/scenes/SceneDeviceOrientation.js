@@ -90,8 +90,10 @@ export class SceneDeviceOrientation {
         const pos = new BABYLON.Vector3(x, y, z);
         if (BABYLON.Vector3.Distance(pos, BABYLON.Vector3.Zero()) < 8) pos.z += 10;
 
-        const size = this.config.targetSizes.min +
+        // Increase asteroid size to make them easier to hit (1.5x original)
+        const baseSize = this.config.targetSizes.min +
             Math.random() * (this.config.targetSizes.max - this.config.targetSizes.min);
+        const size = baseSize * 1.5;
 
         const asteroid = new Enemy(id, pos, size, this.scene);
         const speed = this.config.approachSpeed.min + Math.random() * (this.config.approachSpeed.max - this.config.approachSpeed.min);

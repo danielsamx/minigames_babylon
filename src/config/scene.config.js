@@ -87,7 +87,7 @@ export const SCENE_CONFIG = {
         targetSizes:  { min: 1.0, max: 2.5 },
         // Velocidad de acercamiento hacia el jugador
         approachSpeed: { min: 0.012, max: 0.035 },
-        damageRadius:  4.5,     // distancia a origen para causar daño
+        damageRadius:  6,     // increased radius for easier hit detection
         damagePenalty: 100
     }
 };
