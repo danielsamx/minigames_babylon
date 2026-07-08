@@ -39,14 +39,14 @@ export class SceneFree {
 
         // ── Iluminación realista ─────────────────────────────────────────────
         const ambient = new BABYLON.HemisphericLight('ambientLight', new BABYLON.Vector3(0, 1, 0), this.scene);
-        ambient.intensity  = 0.3;
-        ambient.diffuse    = new BABYLON.Color3(0.22, 0.22, 0.28);
-        ambient.groundColor = new BABYLON.Color3(0.05, 0.05, 0.08);
+        ambient.intensity  = 0.85;
+        ambient.diffuse    = new BABYLON.Color3(0.8, 0.8, 0.85);
+        ambient.groundColor = new BABYLON.Color3(0.15, 0.15, 0.2);
 
         const domeLight = new BABYLON.PointLight('domeLight', new BABYLON.Vector3(0, 7, 0), this.scene);
-        domeLight.intensity = 0.55;
-        domeLight.diffuse   = new BABYLON.Color3(0.95, 0.9, 0.8);
-        domeLight.specular  = new BABYLON.Color3(0.8, 0.75, 0.6);
+        domeLight.intensity = 0.95;
+        domeLight.diffuse   = new BABYLON.Color3(0.95, 0.95, 0.9);
+        domeLight.specular  = new BABYLON.Color3(0.9, 0.85, 0.8);
 
         // ── Cámara ──────────────────────────────────────────────────────────
         this.camera = this.cameraManager.createFreeCamera();
@@ -178,6 +178,11 @@ export class SceneFree {
                 innerMat.specularPower = 90;
                 innerMat.disableLighting = false;
                 inner.material = innerMat;
+            } else if (ped.type === 'cyberCube') {
+                sculpture = BABYLON.MeshBuilder.CreateBox(`sculpt_${idx}`, { size: 0.8 }, this.scene);
+                sculptMat.alpha = 0.85;
+                sculptMat.emissiveColor = col.scale(0.85); // Make it glow brightly
+                sculptMat.diffuseColor = col;
             } else {
                 sculpture = BABYLON.MeshBuilder.CreateBox(`sculpt_${idx}`, { size: 0.8 }, this.scene);
             }

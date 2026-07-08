@@ -22,6 +22,9 @@ export class Enemy {
             (Math.random() - 0.5) * 0.025,
             (Math.random() - 0.5) * 0.025
         );
+        // Enemy AI target and speed (default 0 means static)
+        this.target        = null; // BABYLON.Vector3
+        this.approachSpeed = 0;   // units per frame, will be set per scene
         this.create();
     }
 
@@ -96,8 +99,32 @@ export class Enemy {
 
     update() {
         if (this.mesh) {
+            // rotate for visual flair
             this.mesh.rotation.addInPlace(this.rotSpeed);
+            // move towards target if defined
+            if (this.target && this.approachSpeed > 0) {
+                const dir = this.target.subtract(this.mesh.position);
+                const distance = dir.length();
+                if (distance > this.approachSpeed) {
+                    dir.normalize();
+                    this.mesh.position.addInPlace(dir.scale(this.approachSpeed));
+                } else {
+                    // reached target – stop moving
+                    this.mesh.position.copyFrom(this.target);
+                    this.target = null;
+                }
+            }
         }
+    }
+
+    /**
+     * Set a movement target for the enemy and its approach speed.
+     * @param {BABYLON.Vector3} targetPos Position to chase.
+     * @param {number} speed Units per frame (e.g., 0.02).
+     */
+    setTarget(targetPos, speed) {
+        this.target = targetPos.clone();
+        this.approachSpeed = speed;
     }
 
     /**

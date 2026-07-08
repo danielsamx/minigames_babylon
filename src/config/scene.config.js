@@ -35,7 +35,7 @@ export const SCENE_CONFIG = {
 
     // FreeCamera - Museo
     free: {
-        clearColor: { r: 0.05, g: 0.05, b: 0.07, a: 1.0 },   // Museo nocturno oscuro
+        clearColor: { r: 1.0, g: 1.0, b: 1.0, a: 1.0 },   // Blanco (#ffffff)
         gravity: { x: 0, y: -9.81, z: 0 },
         museumSize: { width: 30, depth: 30, height: 8 },
         wallColor:  { r: 0.85, g: 0.85, b: 0.85 },

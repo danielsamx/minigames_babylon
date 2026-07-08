@@ -33,8 +33,8 @@ export class SceneFollow {
 
         // ── Iluminación realista ─────────────────────────────────────────────
         const ambient = new BABYLON.HemisphericLight('ambientLight', new BABYLON.Vector3(0, 1, 0), this.scene);
-        ambient.intensity = 0.35;
-        ambient.diffuse   = new BABYLON.Color3(0.25, 0.35, 0.55);
+        ambient.intensity = 0.45;
+        ambient.diffuse   = new BABYLON.Color3(0.30, 0.40, 0.65);
 
         const dirLight = new BABYLON.DirectionalLight('dirLight', new BABYLON.Vector3(-1, -2, -1), this.scene);
         dirLight.intensity   = 1.1;

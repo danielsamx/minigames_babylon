@@ -1,398 +1,315 @@
 /**
- * Cargador y generador de texturas procedurales dinámicas.
- * Evita la dependencia de archivos de imágenes externos y permite que la app funcione offline.
+ * AssetLoader utilities for generating procedural textures used across the mini‑games.
+ * All textures now use dark backgrounds with high‑contrast stars / nebulae to match the new black clear colors.
  */
-import { ASSETS_CONFIG } from '../config/assets.config.js';
+// BABYLON is loaded globally via CDN scripts in index.html
 
 export class AssetLoader {
-    /**
-     * Crea una textura de cielo estrellado para el Skybox.
-     * Fondo negro espacio con estrellas brillantes.
-     */
+    /** Creates a starfield texture on a black canvas. */
     static createStarsTexture(scene) {
         const size = 1024;
-        const dynamicTexture = new BABYLON.DynamicTexture("starsTex", size, scene, true);
-        const ctx = dynamicTexture.getContext();
-
-        // Fondo negro espacio profundo
-        ctx.fillStyle = "#060608";
+        const canvas = document.createElement('canvas');
+        canvas.width = canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        // Black background
+        ctx.fillStyle = '#060608';
         ctx.fillRect(0, 0, size, size);
-
-        // Capa 1: estrellas lejanas pequeñas y numerosas
-        const density = ASSETS_CONFIG.textures.stars.density;
-        for (let i = 0; i < density; i++) {
+        // Draw many tiny white stars
+        for (let i = 0; i < 3000; i++) {
             const x = Math.random() * size;
             const y = Math.random() * size;
-            const radius = 0.4 + Math.random() * 0.9;
-            const alpha  = 0.3 + Math.random() * 0.7;
-            const grey   = Math.floor(180 + Math.random() * 75);
-            ctx.globalAlpha = alpha;
-            ctx.fillStyle = `rgb(${grey},${grey},${Math.min(255, grey + 20)})`;
+            const radius = Math.random() * 0.8 + 0.2;
+            const brightness = Math.random() * 0.8 + 0.2;
+            ctx.fillStyle = `rgba(255,255,255,${brightness})`;
             ctx.beginPath();
             ctx.arc(x, y, radius, 0, Math.PI * 2);
             ctx.fill();
         }
+        const texture = new BABYLON.DynamicTexture('stars', { width: size, height: size }, scene, false);
+        texture.getContext().drawImage(canvas, 0, 0);
+        texture.update();
+        return texture;
+    }
 
-        // Capa 2: estrellas brillantes con halo
-        for (let i = 0; i < 80; i++) {
+    /** Creates a dark nebula texture with subtle color clouds. */
+    static createNebulaTexture(scene) {
+        const size = 1024;
+        const canvas = document.createElement('canvas');
+        canvas.width = canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        // Dark base
+        ctx.fillStyle = '#020408';
+        ctx.fillRect(0, 0, size, size);
+        // Add a few colored cloud blobs
+        const colors = ['#1e3a8a', '#4c1d95', '#8b5cf6'];
+        for (let i = 0; i < 30; i++) {
             const x = Math.random() * size;
             const y = Math.random() * size;
-            const r = 1.5 + Math.random() * 2.0;
-            // Halo suave
-            const grad = ctx.createRadialGradient(x, y, 0, x, y, r * 3);
-            const starColors = ['rgba(200,220,255,', 'rgba(255,245,200,', 'rgba(220,200,255,'];
-            const col = starColors[Math.floor(Math.random() * starColors.length)];
-            grad.addColorStop(0, col + '0.9)');
-            grad.addColorStop(0.5, col + '0.3)');
-            grad.addColorStop(1,   col + '0)');
-            ctx.globalAlpha = 0.8;
+            const radius = Math.random() * 150 + 50;
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            const grad = ctx.createRadialGradient(x, y, 0, x, y, radius);
+            grad.addColorStop(0, `${color}44`);
+            grad.addColorStop(1, `${color}00`);
             ctx.fillStyle = grad;
             ctx.beginPath();
-            ctx.arc(x, y, r * 3, 0, Math.PI * 2);
+            ctx.arc(x, y, radius, 0, Math.PI * 2);
             ctx.fill();
         }
+        const texture = new BABYLON.DynamicTexture('nebula', { width: size, height: size }, scene, false);
+        texture.getContext().drawImage(canvas, 0, 0);
+        texture.update();
+        return texture;
+    }
 
-        ctx.globalAlpha = 1.0;
-        dynamicTexture.update();
-        return dynamicTexture;
+    /** Creates a neon grid texture (dark background with cyan/red lines). */
+    static createNeonGridTexture(scene) {
+        const size = 512;
+        const canvas = document.createElement('canvas');
+        canvas.width = canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        // Dark background
+        ctx.fillStyle = '#040208';
+        ctx.fillRect(0, 0, size, size);
+        const step = 32;
+        ctx.strokeStyle = '#00e5ff44';
+        ctx.lineWidth = 2;
+        for (let i = 0; i <= size; i += step) {
+            ctx.beginPath();
+            ctx.moveTo(i, 0);
+            ctx.lineTo(i, size);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(0, i);
+            ctx.lineTo(size, i);
+            ctx.stroke();
+        }
+        const texture = new BABYLON.DynamicTexture('neonGrid', { width: size, height: size }, scene, false);
+        texture.getContext().drawImage(canvas, 0, 0);
+        texture.update();
+        return texture;
     }
 
     /**
-     * Crea la textura procedural del Sol (plasma incandescente).
+     * Creates a bright sun texture with radial gradient for emissive material.
+     * @param {BABYLON.Scene} scene The Babylon.js scene.
+     * @returns {BABYLON.DynamicTexture} The generated sun texture.
      */
     static createSunTexture(scene) {
-        const size = 512;
-        const dynamicTexture = new BABYLON.DynamicTexture("sunTex", size, scene, true);
-        const ctx = dynamicTexture.getContext();
-        const conf = ASSETS_CONFIG.textures.sun;
-
-        // Degradado radial plasma incandescente
-        const grad = ctx.createRadialGradient(size/2, size/2, 10, size/2, size/2, size/2);
-        grad.addColorStop(0,   '#ffffff');
-        grad.addColorStop(0.1, '#ffffcc');
-        grad.addColorStop(0.3, conf.baseColor);
-        grad.addColorStop(0.75, conf.glowColor);
-        grad.addColorStop(1,   '#7c2d12');
-
+        const size = 256;
+        const canvas = document.createElement('canvas');
+        canvas.width = canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        const grad = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+        grad.addColorStop(0, 'rgba(255,200,50,1)');
+        grad.addColorStop(0.5, 'rgba(255,150,20,0.8)');
+        grad.addColorStop(1, 'rgba(255,100,0,0)');
         ctx.fillStyle = grad;
         ctx.fillRect(0, 0, size, size);
+        const texture = new BABYLON.DynamicTexture('sun', { width: size, height: size }, scene, false);
+        texture.getContext().drawImage(canvas, 0, 0);
+        texture.update();
+        return texture;
+    }
 
-        // Flares y destellos solares
-        for (let i = 0; i < 28; i++) {
-            ctx.globalAlpha = 0.15 + Math.random() * 0.25;
-            ctx.strokeStyle = i % 2 === 0 ? '#fef08a' : '#fdba74';
-            ctx.lineWidth = 1 + Math.random() * 4;
+    /** Brick texture for museum walls (dark stone look). */
+    static createHandDrawnBrickTexture(scene) {
+        const size = 1024;
+        const canvas = document.createElement('canvas');
+        canvas.width = canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        // Dark stone base
+        ctx.fillStyle = '#1a1a1f';
+        ctx.fillRect(0, 0, size, size);
+        // Simple brick pattern (lighter lines)
+        const brickW = 64, brickH = 32;
+        ctx.strokeStyle = '#2e2e3a';
+        ctx.lineWidth = 2;
+        for (let y = 0; y < size; y += brickH) {
+            for (let x = (Math.floor(y / brickH) % 2) * (brickW / 2); x < size; x += brickW) {
+                ctx.strokeRect(x, y, brickW, brickH);
+            }
+        }
+        const texture = new BABYLON.DynamicTexture('brick', { width: size, height: size }, scene, false);
+        texture.getContext().drawImage(canvas, 0, 0);
+        texture.update();
+        return texture;
+    }
+
+    // Existing helpers kept for compatibility
+    static createMuseumFloorTexture(scene) {
+        const size = 512;
+        const canvas = document.createElement('canvas');
+        canvas.width = canvas.height = size;
+        const ctx = canvas.getContext('2d');
+
+        // Base tile color (elegant dark grey)
+        ctx.fillStyle = '#222227';
+        ctx.fillRect(0, 0, size, size);
+
+        // Draw tile grid lines
+        const tileSize = 128;
+        ctx.strokeStyle = '#111113';
+        ctx.lineWidth = 4;
+        for (let x = 0; x <= size; x += tileSize) {
             ctx.beginPath();
-            ctx.arc(size/2, size/2, 70 + Math.random() * 120, Math.random() * Math.PI, Math.random() * Math.PI * 2);
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, size);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(0, x);
+            ctx.lineTo(size, x);
             ctx.stroke();
         }
 
-        // Manchas solares
-        ctx.globalAlpha = 0.35;
-        ctx.fillStyle = '#78350f';
-        for (let i = 0; i < 8; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const dist  = 40 + Math.random() * 80;
+        // Add some noise or marble veins inside each tile to look premium
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+        ctx.lineWidth = 1;
+        for (let i = 0; i < 20; i++) {
             ctx.beginPath();
-            ctx.ellipse(size/2 + Math.cos(angle)*dist, size/2 + Math.sin(angle)*dist, 8 + Math.random()*18, 5 + Math.random()*10, angle, 0, Math.PI*2);
-            ctx.fill();
-        }
-
-        ctx.globalAlpha = 1.0;
-        dynamicTexture.update();
-        return dynamicTexture;
-    }
-
-    /**
-     * Crea texturas procedurales para los planetas.
-     */
-    static createPlanetTexture(planetKey, scene) {
-        const size = 512;
-        const dynamicTexture = new BABYLON.DynamicTexture(`${planetKey}Tex`, size, scene, true);
-        const ctx = dynamicTexture.getContext();
-        const conf = ASSETS_CONFIG.textures[planetKey];
-
-        if (!conf) {
-            ctx.fillStyle = "#888888";
-            ctx.fillRect(0, 0, size, size);
-            dynamicTexture.update();
-            return dynamicTexture;
-        }
-
-        ctx.fillStyle = conf.baseColor;
-        ctx.fillRect(0, 0, size, size);
-
-        if (planetKey === 'mercury' || planetKey === 'mars') {
-            // Cráteres + rugosidad
-            ctx.fillStyle = conf.craterColor || conf.darkColor;
-            for (let i = 0; i < conf.craters; i++) {
-                const x = Math.random() * size;
-                const y = Math.random() * size;
-                const r = 10 + Math.random() * 30;
-                ctx.beginPath();
-                ctx.arc(x, y, r, 0, Math.PI * 2);
-                ctx.fill();
-                // Borde iluminado
-                ctx.strokeStyle = "rgba(255,255,255,0.18)";
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.arc(x + 2, y + 2, r, 0, Math.PI * 2);
-                ctx.stroke();
-            }
-            // Rugosidad adicional
-            for (let i = 0; i < 300; i++) {
-                const x = Math.random() * size;
-                const y = Math.random() * size;
-                ctx.globalAlpha = 0.12;
-                ctx.fillStyle = Math.random() > 0.5 ? '#ffffff' : '#000000';
-                ctx.fillRect(x, y, 2, 2);
-            }
-            ctx.globalAlpha = 1;
-        } else if (planetKey === 'venus' || planetKey === 'jupiter') {
-            // Bandas atmosféricas
-            for (let i = 0; i < conf.bands; i++) {
-                ctx.fillStyle = i % 2 === 0 ? conf.cloudColor || conf.bandColor : conf.baseColor;
-                const h = 20 + Math.random() * 40;
-                const y = (size / conf.bands) * i;
-                ctx.fillRect(0, y, size, h);
-            }
-            if (planetKey === 'jupiter') {
-                // Gran Mancha Roja
-                ctx.fillStyle = conf.spotColor;
-                ctx.beginPath();
-                ctx.ellipse(size * 0.6, size * 0.65, 45, 25, 0, 0, Math.PI * 2);
-                ctx.fill();
-                // Bordes oscuros de bandas
-                ctx.strokeStyle = 'rgba(0,0,0,0.3)';
-                ctx.lineWidth = 3;
-                for (let i = 0; i < conf.bands; i++) {
-                    const y = (size / conf.bands) * i;
-                    ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(size,y); ctx.stroke();
-                }
-            }
-        } else if (planetKey === 'earth') {
-            // Océanos base
-            ctx.fillStyle = conf.landColor;
-            for (let i = 0; i < 8; i++) {
-                const cx = size * 0.2 + Math.random() * (size * 0.6);
-                const cy = size * 0.2 + Math.random() * (size * 0.6);
-                const r  = 60 + Math.random() * 80;
-                ctx.beginPath();
-                ctx.arc(cx, cy, r, 0, Math.PI * 2);
-                ctx.fill();
-                for (let j = 0; j < 3; j++) {
-                    ctx.beginPath();
-                    ctx.arc(cx + (Math.random()-0.5)*80, cy + (Math.random()-0.5)*80, r*0.5, 0, Math.PI*2);
-                    ctx.fill();
-                }
-            }
-            // Nubes
-            ctx.fillStyle = conf.cloudColor;
-            ctx.globalAlpha = 0.45;
-            for (let i = 0; i < 5; i++) {
-                const y = Math.random() * size;
-                ctx.beginPath();
-                ctx.ellipse(size/2, y, size*0.45, 15+Math.random()*20, 0.05, 0, Math.PI*2);
-                ctx.fill();
-            }
-            ctx.globalAlpha = 1.0;
-        }
-
-        dynamicTexture.update();
-        return dynamicTexture;
-    }
-
-    /**
-     * Textura de suelo de museo (mármol oscuro lujoso).
-     */
-    static createMuseumFloorTexture(scene) {
-        const size = ASSETS_CONFIG.textures.museumFloor.gridSize;
-        const dynamicTexture = new BABYLON.DynamicTexture("museumFloorTex", size, scene, true);
-        const ctx = dynamicTexture.getContext();
-        const conf = ASSETS_CONFIG.textures.museumFloor;
-
-        // Mármol oscuro
-        ctx.fillStyle = conf.primary;
-        ctx.fillRect(0, 0, size, size);
-
-        // Bordes de baldosa
-        ctx.strokeStyle = conf.secondary;
-        ctx.lineWidth = 6;
-        ctx.strokeRect(0, 0, size, size);
-
-        // Vetas de mármol
-        ctx.strokeStyle = "rgba(255,255,255,0.06)";
-        ctx.lineWidth = 1.5;
-        for (let i = 0; i < 7; i++) {
-            ctx.beginPath();
-            ctx.moveTo(Math.random() * size, 0);
+            ctx.moveTo(Math.random() * size, Math.random() * size);
             ctx.bezierCurveTo(
-                Math.random() * size, size * 0.3,
-                Math.random() * size, size * 0.7,
-                Math.random() * size, size
+                Math.random() * size, Math.random() * size,
+                Math.random() * size, Math.random() * size,
+                Math.random() * size, Math.random() * size
             );
             ctx.stroke();
         }
 
-        dynamicTexture.update();
-        return dynamicTexture;
+        const texture = new BABYLON.DynamicTexture('museumFloor', { width: size, height: size }, scene, false);
+        texture.getContext().drawImage(canvas, 0, 0);
+        texture.update();
+        return texture;
     }
 
-    /**
-     * Textura de cuadrícula de neón sobre fondo negro.
-     */
-    static createNeonGridTexture(colorHex, scene) {
-        const size = 256;
-        const dynamicTexture = new BABYLON.DynamicTexture("neonGridTex", size, scene, true);
-        const ctx = dynamicTexture.getContext();
-
-        // Fondo negro para laberinto neon
-        ctx.fillStyle = "#040208";
-        ctx.fillRect(0, 0, size, size);
-
-        // Líneas de neón con glow
-        ctx.shadowColor = colorHex;
-        ctx.shadowBlur  = 12;
-        ctx.strokeStyle = colorHex;
-        ctx.lineWidth   = 2;
-        ctx.strokeRect(4, 4, size-8, size-8);
-
-        // Líneas internas sutiles
-        ctx.shadowBlur  = 4;
-        ctx.globalAlpha = 0.4;
-        ctx.beginPath();
-        ctx.moveTo(size/2, 4); ctx.lineTo(size/2, size-4);
-        ctx.moveTo(4, size/2); ctx.lineTo(size-4, size/2);
-        ctx.stroke();
-
-        ctx.shadowBlur  = 0;
-        ctx.globalAlpha = 1.0;
-        dynamicTexture.update();
-        return dynamicTexture;
-    }
-
-    /**
-     * Textura de pared de piedra oscura para el museo.
-     */
-    static createHandDrawnBrickTexture(scene) {
+    static createPlanetTexture(name, scene) {
         const size = 512;
-        const dynamicTexture = new BABYLON.DynamicTexture("handDrawnBrickTex", size, scene, true);
-        const ctx = dynamicTexture.getContext();
+        const canvas = document.createElement('canvas');
+        canvas.width = canvas.height = size;
+        const ctx = canvas.getContext('2d');
 
-        // Fondo piedra oscura
-        ctx.fillStyle = "#1a1a1f";
-        ctx.fillRect(0, 0, size, size);
-
-        // Variación de color procedural por ladrillo
-        const rows = 8;
-        const cols = 4;
-        const rh = size / rows;
-        const cw = size / cols;
-
-        for (let r = 0; r < rows; r++) {
-            const offset = (r % 2) * (cw / 2);
-            for (let c = 0; c < cols + 1; c++) {
-                const x = c * cw - offset;
-                const y = r * rh;
-                const grey = Math.floor(22 + Math.random() * 18);
-                ctx.fillStyle = `rgb(${grey},${grey},${grey + 3})`;
-                ctx.fillRect(x + 3, y + 3, cw - 6, rh - 6);
-            }
-        }
-
-        // Mortero (líneas entre ladrillos)
-        ctx.strokeStyle = "#0d0d12";
-        ctx.lineWidth = 5;
-
-        for (let i = 0; i <= rows; i++) {
-            ctx.beginPath();
-            const y = i * rh;
-            ctx.moveTo(0, y);
-            for (let x = 10; x <= size; x += 10) {
-                ctx.lineTo(x, y + (Math.random() - 0.5) * 1.2);
-            }
-            ctx.stroke();
-        }
-
-        for (let r = 0; r < rows; r++) {
-            const offset = (r % 2) * (cw / 2);
-            const yStart = r * rh;
-            const yEnd   = (r + 1) * rh;
-            for (let c = 0; c <= cols + 1; c++) {
-                const x = c * cw - offset;
+        // Draw based on planet name
+        if (name === 'mercury') {
+            // Grey rocky planet with craters
+            ctx.fillStyle = '#6e6e73';
+            ctx.fillRect(0, 0, size, size);
+            
+            // Draw some craters/spots
+            ctx.fillStyle = '#545459';
+            for (let i = 0; i < 40; i++) {
+                const cx = Math.random() * size;
+                const cy = Math.random() * size;
+                const cr = Math.random() * 20 + 5;
                 ctx.beginPath();
-                ctx.moveTo(x, yStart);
-                for (let y = yStart + 5; y <= yEnd; y += 5) {
-                    ctx.lineTo(x + (Math.random()-0.5)*1.2, y);
-                }
+                ctx.arc(cx, cy, cr, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Craters highlights/shadows
+                ctx.strokeStyle = '#8a8a91';
+                ctx.beginPath();
+                ctx.arc(cx, cy, cr, 0, Math.PI);
                 ctx.stroke();
             }
-        }
-
-        // Brillo sutil en bordes superiores de ladrillos
-        ctx.strokeStyle = "rgba(255,255,255,0.04)";
-        ctx.lineWidth = 1;
-        for (let r = 0; r < rows; r++) {
-            const offset = (r % 2) * (cw / 2);
-            const y = r * rh + 4;
-            for (let c = 0; c <= cols + 1; c++) {
-                const x = c * cw - offset;
-                ctx.beginPath();
-                ctx.moveTo(x + 4, y); ctx.lineTo(x + cw - 4, y);
-                ctx.stroke();
+        } else if (name === 'venus') {
+            // Yellowish orange thick atmosphere with acidic clouds
+            ctx.fillStyle = '#d9a05b';
+            ctx.fillRect(0, 0, size, size);
+            
+            // Subtle horizontal/diagonal cloud streaks
+            for (let i = 0; i < 30; i++) {
+                const y = Math.random() * size;
+                const h = Math.random() * 60 + 20;
+                const grad = ctx.createLinearGradient(0, y, 0, y + h);
+                grad.addColorStop(0, 'rgba(242, 214, 162, 0.4)');
+                grad.addColorStop(1, 'rgba(217, 126, 74, 0)');
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, y, size, h);
             }
+        } else if (name === 'earth') {
+            // Blue oceans, green/brown landmasses, white clouds
+            ctx.fillStyle = '#1b4b8a'; // Deep blue ocean
+            ctx.fillRect(0, 0, size, size);
+            
+            // Draw random green/brown landmass blobs
+            ctx.fillStyle = '#2d6a4f';
+            for (let i = 0; i < 15; i++) {
+                const cx = Math.random() * size;
+                const cy = Math.random() * size;
+                const cr = Math.random() * 80 + 40;
+                
+                ctx.beginPath();
+                ctx.arc(cx, cy, cr, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Add some brown details in the center of landmasses
+                ctx.fillStyle = '#8c6239';
+                ctx.beginPath();
+                ctx.arc(cx, cy, cr * 0.5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#2d6a4f'; // Restore fillStyle
+            }
+            
+            // White cloud swirls
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
+            for (let i = 0; i < 10; i++) {
+                ctx.beginPath();
+                ctx.ellipse(Math.random() * size, Math.random() * size, Math.random() * 100 + 50, Math.random() * 20 + 5, Math.random() * Math.PI, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        } else if (name === 'mars') {
+            // Red/orange rusty planet with white polar caps and dark dunes
+            ctx.fillStyle = '#c15c3d';
+            ctx.fillRect(0, 0, size, size);
+            
+            // Dark dunes
+            ctx.fillStyle = '#823720';
+            for (let i = 0; i < 12; i++) {
+                const cx = Math.random() * size;
+                const cy = Math.random() * size;
+                const cr = Math.random() * 90 + 30;
+                ctx.beginPath();
+                ctx.arc(cx, cy, cr, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            // White polar caps at the "top" and "bottom" of the texture (which wrap around the poles)
+            ctx.fillStyle = '#f7f4f0';
+            ctx.fillRect(0, 0, size, 40);
+            ctx.fillRect(0, size - 40, size, 40);
+        } else if (name === 'jupiter') {
+            // Horizontal bands of orange, yellow, brown, white, and a Great Red Spot
+            ctx.fillStyle = '#e5a65d';
+            ctx.fillRect(0, 0, size, size);
+            
+            const colors = ['#b87431', '#d8a061', '#f3d9b1', '#a56020', '#ebd3b4'];
+            for (let y = 0; y < size; y += 16) {
+                ctx.fillStyle = colors[Math.floor(Math.random() * colors.length)];
+                const h = Math.random() * 32 + 8;
+                ctx.fillRect(0, y, size, h);
+                y += h - 16; // increment y based on variable height
+            }
+            
+            // Great Red Spot (ellipse around 70% height, 60% width)
+            ctx.fillStyle = '#b33925';
+            ctx.beginPath();
+            ctx.ellipse(size * 0.6, size * 0.7, 45, 25, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Swirl inside Great Red Spot
+            ctx.fillStyle = '#d96e5d';
+            ctx.beginPath();
+            ctx.ellipse(size * 0.6, size * 0.7, 30, 15, 0, 0, Math.PI * 2);
+            ctx.fill();
+        } else {
+            // Fallback generic planet
+            ctx.fillStyle = '#7a7a7a';
+            ctx.fillRect(0, 0, size, size);
         }
 
-        dynamicTexture.update();
-        return dynamicTexture;
-    }
-
-    /**
-     * Textura de nebulosa oscura para skybox espacial.
-     */
-    static createNebulaTexture(scene) {
-        const size = 512;
-        const dynamicTexture = new BABYLON.DynamicTexture("nebulaTex", size, scene, true);
-        const ctx = dynamicTexture.getContext();
-
-        // Fondo negro espacio
-        ctx.fillStyle = "#020408";
-        ctx.fillRect(0, 0, size, size);
-
-        // Estrellas de fondo
-        for (let i = 0; i < 500; i++) {
-            const x = Math.random() * size;
-            const y = Math.random() * size;
-            const r = 0.3 + Math.random() * 0.8;
-            ctx.globalAlpha = 0.25 + Math.random() * 0.65;
-            ctx.fillStyle = `rgba(200,210,255,1)`;
-            ctx.beginPath();
-            ctx.arc(x, y, r, 0, Math.PI * 2);
-            ctx.fill();
-        }
-        ctx.globalAlpha = 1;
-
-        // Nubes de nebulosa vibrantes
-        const nebulae = [
-            { x: 150, y: 150, r: 200, c1: "rgba(120,60,220,0.45)", c2: "rgba(80,0,160,0)" },
-            { x: 370, y: 200, r: 180, c1: "rgba(220,30,80,0.35)",  c2: "rgba(150,0,40,0)" },
-            { x: 210, y: 370, r: 220, c1: "rgba(20,140,220,0.40)", c2: "rgba(0,60,150,0)" },
-            { x: 420, y: 400, r: 160, c1: "rgba(50,200,150,0.30)", c2: "rgba(0,100,80,0)"  }
-        ];
-
-        nebulae.forEach(n => {
-            const grad = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, n.r);
-            grad.addColorStop(0, n.c1);
-            grad.addColorStop(1, n.c2);
-            ctx.fillStyle = grad;
-            ctx.globalAlpha = 1;
-            ctx.beginPath();
-            ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
-            ctx.fill();
-        });
-
-        dynamicTexture.update();
-        return dynamicTexture;
+        const texture = new BABYLON.DynamicTexture(`${name}Texture`, { width: size, height: size }, scene, false);
+        texture.getContext().drawImage(canvas, 0, 0);
+        texture.update();
+        return texture;
     }
 
     /**

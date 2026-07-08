@@ -93,7 +93,10 @@ export class SceneDeviceOrientation {
         const size = this.config.targetSizes.min +
             Math.random() * (this.config.targetSizes.max - this.config.targetSizes.min);
 
-        this.targets.push(new Enemy(id, pos, size, this.scene));
+        const asteroid = new Enemy(id, pos, size, this.scene);
+        const speed = this.config.approachSpeed.min + Math.random() * (this.config.approachSpeed.max - this.config.approachSpeed.min);
+        asteroid.setTarget(BABYLON.Vector3.Zero(), speed);
+        this.targets.push(asteroid);
     }
 
     setupInputEvents() {
@@ -104,6 +107,47 @@ export class SceneDeviceOrientation {
             if (e.keyCode === 32) { e.preventDefault(); this.shootLaser(); }
         };
         window.addEventListener('keydown', this.onKeyDown);
+
+        // Fallback de arrastre del ratón para PC/Escritorio
+        let isDragging = false;
+        let prevX = 0;
+        let prevY = 0;
+
+        this.onPointerDown = (e) => {
+            isDragging = true;
+            prevX = e.clientX;
+            prevY = e.clientY;
+        };
+
+        this.onPointerMove = (e) => {
+            if (!isDragging || !this.camera) return;
+            const dx = e.clientX - prevX;
+            const dy = e.clientY - prevY;
+
+            // Sensibilidad configurada o valor por defecto
+            const speed = this.config.desktopSpeed || 0.003;
+            this.camera.rotation.y += dx * speed;
+            this.camera.rotation.x += dy * speed;
+
+            // Limitar rotación vertical para evitar voltear
+            const limit = Math.PI / 2.1;
+            if (this.camera.rotation.x > limit) this.camera.rotation.x = limit;
+            if (this.camera.rotation.x < -limit) this.camera.rotation.x = -limit;
+
+            prevX = e.clientX;
+            prevY = e.clientY;
+        };
+
+        this.onPointerUp = () => {
+            isDragging = false;
+        };
+
+        const canvas = this.scene.getEngine().getRenderingCanvas();
+        if (canvas) {
+            canvas.addEventListener('pointerdown', this.onPointerDown);
+            canvas.addEventListener('pointermove', this.onPointerMove);
+            canvas.addEventListener('pointerup', this.onPointerUp);
+        }
     }
 
     shootLaser() {
@@ -205,13 +249,61 @@ export class SceneDeviceOrientation {
     }
 
     update() {
-        this.targets.forEach(asteroid => asteroid.update());
+        for (let i = this.targets.length - 1; i >= 0; i--) {
+            const asteroid = this.targets[i];
+            asteroid.update();
+
+            if (asteroid.mesh) {
+                const dist = BABYLON.Vector3.Distance(asteroid.mesh.position, BABYLON.Vector3.Zero());
+                if (dist < this.config.damageRadius) {
+                    // Explota el asteroide visualmente
+                    asteroid.explode();
+
+                    // Remueve de los objetivos activos
+                    this.targets.splice(i, 1);
+
+                    // Penalización de daño
+                    this.score = Math.max(0, this.score - this.config.damagePenalty);
+                    this.streak = 0;
+
+                    // Sonido de impacto contra el jugador
+                    if (this.sceneManager.audioManager) {
+                        this.sceneManager.audioManager.playHit();
+                    }
+
+                    // Mensaje de impacto
+                    this.sceneManager.uiController.showFloatingComicBubble(
+                        '¡IMPACTO! -100',
+                        window.innerWidth / 2,
+                        window.innerHeight / 2
+                    );
+
+                    // Genera uno nuevo tras 1 segundo
+                    setTimeout(() => {
+                        this.spawnRandomTarget(`asteroid_${Date.now()}`);
+                        this.sceneManager.uiController.updateDeviceOrientationUI(this);
+                    }, 1000);
+
+                    // Actualiza puntuación y UI
+                    this.sceneManager.uiController.saveRecord('deviceOrientation', this.score);
+                    this.sceneManager.uiController.updateDeviceOrientationUI(this);
+                }
+            }
+        }
     }
 
     dispose() {
         window.removeEventListener('keydown', this.onKeyDown);
         const shootBtn = document.getElementById('btn-shoot');
         if (shootBtn) shootBtn.removeEventListener('click', this.onShootBind);
+
+        const canvas = this.scene.getEngine().getRenderingCanvas();
+        if (canvas) {
+            if (this.onPointerDown) canvas.removeEventListener('pointerdown', this.onPointerDown);
+            if (this.onPointerMove) canvas.removeEventListener('pointermove', this.onPointerMove);
+            if (this.onPointerUp) canvas.removeEventListener('pointerup', this.onPointerUp);
+        }
+
         const actionOverlay = document.getElementById('action-overlay');
         if (actionOverlay) actionOverlay.style.display = 'none';
         this.targets.forEach(t => t.dispose());
